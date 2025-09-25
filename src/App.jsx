@@ -2882,9 +2882,12 @@ export default function App() {
               viewport={{ once: true }}
             >
           <img 
-            src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+            src={theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png"} 
             alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
-            className="footer-logo" 
+            className="footer-logo"
+            onError={(e) => {
+              e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+            }}
           />
               <h3>Awra Finishing & Interior</h3>
               <p>Creating exceptional architectural spaces and compelling brands with professional design and premium finishing services.</p>
