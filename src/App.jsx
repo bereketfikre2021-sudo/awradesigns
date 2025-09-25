@@ -628,8 +628,11 @@ export default function App() {
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           >
             <img 
-              src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
-              alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
+              src={theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png"} 
+              alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo"
+              onError={(e) => {
+                e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+              }}
             />
           </motion.div>
           <motion.h2
@@ -891,9 +894,12 @@ export default function App() {
             whileTap={{ scale: 0.95 }}
           >
           <img 
-            src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+            src={theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png"} 
             alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
-            className="logo-img" 
+            className="logo-img"
+            onError={(e) => {
+              e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+            }}
           />
           
           

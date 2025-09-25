@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'images/*.webp'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'images/*.webp', 'images/LOGO-*.png'],
       manifest: {
         name: 'Awra Finishing & Interior - Professional Architecture & Design',
         short_name: 'Awra Interior',
@@ -120,5 +120,5 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   },
-  base: './'
+  base: '/'
 })
