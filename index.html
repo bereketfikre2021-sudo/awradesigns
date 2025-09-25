@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
     <title>Awra Finishing & Interior - Professional Architecture & Design in Addis Ababa</title>
     
     <!-- SEO Meta Tags -->
@@ -63,12 +63,10 @@
     <meta name="geo.position" content="9.1450;38.7756" />
     <meta name="ICBM" content="9.1450, 38.7756" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/images/hero-image.webp" as="image" type="image/webp" />
-    <link rel="preload" href="/images/LOGO.webp" as="image" type="image/webp" />
-    <link rel="preload" href="/favicon.ico" as="image" type="image/x-icon" />
+    <!-- Preload critical resources - only for above-the-fold content -->
+    <link rel="preload" href="/images/hero-image.webp" as="image" type="image/webp" fetchpriority="high" />
     
-    <!-- Resource hints for better performance -->
+    <!-- Resource hints for better performance - use prefetch for below-the-fold content -->
     <link rel="prefetch" href="/images/work-samples-1.webp" />
     <link rel="prefetch" href="/images/work-samples-2.webp" />
     <link rel="prefetch" href="/images/work-samples-3.webp" />

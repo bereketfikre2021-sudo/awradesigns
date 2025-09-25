@@ -1,0 +1,360 @@
+/**
+ * Enhanced Responsive Design Utilities
+ * Ensures perfect responsiveness across all devices
+ */
+
+/* Base responsive utilities */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-width: 320px; /* Minimum supported width */
+}
+
+/* Container responsive utilities */
+.container,
+.services-container,
+.about-container,
+.works-container,
+.pricing-container,
+.contact-container,
+.blog-container,
+.faq-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+/* Image responsiveness */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Video responsiveness */
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Table responsiveness */
+table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+/* Form responsiveness */
+input,
+textarea,
+select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Button touch targets */
+.btn,
+button,
+.mobile-menu-btn,
+.nav-cta {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Text responsiveness */
+h1, h2, h3, h4, h5, h6 {
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+p, span, div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Flexbox responsive utilities */
+.flex-responsive {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.flex-responsive > * {
+  flex: 1 1 300px; /* Minimum 300px width */
+}
+
+/* Grid responsive utilities */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-md);
+}
+
+/* Card responsive utilities */
+.card-responsive {
+  width: 100%;
+  max-width: 100%;
+  min-height: 200px;
+  padding: var(--space-md);
+  box-sizing: border-box;
+}
+
+/* Modal responsiveness */
+.modal-responsive {
+  width: 95vw;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 2.5vh auto;
+}
+
+/* Navigation responsive utilities */
+.nav-responsive {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+/* Hero section responsiveness */
+.hero-responsive {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-lg);
+}
+
+/* Section responsiveness */
+.section-responsive {
+  padding: var(--space-xl) 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Enhanced breakpoints for better mobile experience */
+@media (max-width: 1200px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: var(--space-lg);
+    padding-right: var(--space-lg);
+  }
+}
+
+@media (max-width: 992px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+  
+  .flex-responsive {
+    flex-direction: column;
+  }
+  
+  .flex-responsive > * {
+    flex: 1 1 auto;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-responsive {
+    min-height: 80vh;
+    padding: var(--space-md);
+  }
+  
+  .section-responsive {
+    padding: var(--space-lg) 0;
+  }
+  
+  .modal-responsive {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+  }
+  
+  .hero-responsive {
+    min-height: 70vh;
+    padding: var(--space-sm);
+  }
+  
+  .section-responsive {
+    padding: var(--space-md) 0;
+  }
+  
+  .card-responsive {
+    padding: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+  }
+  
+  .hero-responsive {
+    min-height: 60vh;
+    padding: var(--space-xs);
+  }
+  
+  .section-responsive {
+    padding: var(--space-sm) 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .hero-responsive {
+    min-height: 50vh;
+    padding: 8px;
+  }
+  
+  .section-responsive {
+    padding: 8px 0;
+  }
+  
+  .card-responsive {
+    padding: 8px;
+  }
+}
+
+/* Landscape orientation fixes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-responsive {
+    min-height: 100vh;
+    padding: var(--space-sm);
+  }
+  
+  .modal-responsive {
+    max-height: 95vh;
+  }
+}
+
+/* High DPI display fixes */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode responsive adjustments */
+@media (prefers-color-scheme: dark) {
+  .card-responsive {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Print styles */
+@media print {
+  .nav,
+  .mobile-menu-btn,
+  .mobile-menu,
+  .scroll-to-top,
+  .btn {
+    display: none !important;
+  }
+  
+  .container,
+  .services-container,
+  .about-container,
+  .works-container,
+  .pricing-container,
+  .contact-container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .hero-responsive {
+    min-height: auto;
+    page-break-inside: avoid;
+  }
+  
+  .section-responsive {
+    page-break-inside: avoid;
+  }
+}

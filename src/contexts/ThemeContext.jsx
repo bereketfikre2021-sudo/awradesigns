@@ -82,6 +82,30 @@ export const ThemeToggle = ({ className = '', size = 'medium' }) => {
     setTimeout(() => setIsAnimating(false), 300);
   };
 
+  // Professional SVG Icons
+  const MoonIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path 
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" 
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+
+  const SunIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="4" fill="currentColor" stroke="currentColor" strokeWidth="1.2"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" 
+            stroke="currentColor" 
+            strokeWidth="1.2" 
+            strokeLinecap="round"/>
+    </svg>
+  );
+
   if (!isLoaded) {
     return (
       <div className={`theme-toggle ${className} ${size}`}>
@@ -92,7 +116,7 @@ export const ThemeToggle = ({ className = '', size = 'medium' }) => {
 
   return (
     <motion.button
-      className={`theme-toggle ${className} ${size}`}
+      className={`theme-toggle ${className} ${size} ${isAnimating ? 'animating' : ''}`}
       onClick={handleToggle}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -116,30 +140,29 @@ export const ThemeToggle = ({ className = '', size = 'medium' }) => {
             {theme === 'dark' ? (
               <motion.div
                 key="moon"
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="theme-icon"
               >
-                🌙
+                <MoonIcon />
               </motion.div>
             ) : (
               <motion.div
                 key="sun"
-                initial={{ opacity: 0, rotate: -90 }}
-                animate={{ opacity: 1, rotate: 0 }}
-                exit={{ opacity: 0, rotate: 90 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="theme-icon"
               >
-                ☀️
+                <SunIcon />
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
       </div>
-
     </motion.button>
   );
 };

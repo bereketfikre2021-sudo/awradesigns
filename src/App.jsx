@@ -4,6 +4,8 @@ import { useSpring, animated } from 'react-spring';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useDevice, usePerformance, useAnimatedInView, useLazyLoading, useLazyImage, useSEO, usePerformanceMonitoring } from './hooks';
 import { utils } from './utils';
+import { preloadCriticalResources, prefetchResources, optimizeForConnection } from './utils/resourceLoader';
+import { initResponsiveTesting } from './utils/responsiveTest';
 import LazyImage from './components/LazyImage';
 import LazySection from './components/LazySection';
 import { ThemeToggle, useTheme } from './contexts/ThemeContext.jsx';
@@ -11,6 +13,7 @@ import { HoverGlow, RippleButton, ScrollAnimation } from './components/MicroInte
 import WhyChooseUsLight from './components/WhyChooseUsLight.jsx';
 import './App.css';
 import './styles/WhyChooseUsLight.css';
+import './styles/responsive-enhancements.css';
 
 // Lazy load heavy components (commented out to avoid import errors)
 // const ThreeDScene = lazy(() => import('./components/ThreeDScene'));
@@ -80,7 +83,6 @@ export default function App() {
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showContactDropdown, setShowContactDropdown] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // SEO and Performance monitoring
   const currentMeta = getPageMeta(currentSection);
@@ -107,29 +109,6 @@ export default function App() {
     };
   }, [showContactDropdown]);
 
-  // Mobile menu toggle function
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // Close mobile menu when clicking outside or on link
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
-  // Handle body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.classList.add('mobile-menu-open');
-    } else {
-      document.body.classList.remove('mobile-menu-open');
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove('mobile-menu-open');
-    };
-  }, [isMobileMenuOpen]);
 
   // Form states
   const [contactForm, setContactForm] = useState({
@@ -222,13 +201,23 @@ export default function App() {
     }
   }, [performance.frameRate]);
 
-  // Preload hero image for better performance
+  // Optimized resource loading with connection-aware prefetching
   useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
+    const connectionSettings = optimizeForConnection();
+    
+    // Always preload critical above-the-fold resources
+    preloadCriticalResources();
+    
+    // Only prefetch additional resources if connection allows
+    if (connectionSettings.prefetch) {
+      prefetchResources();
+    }
+    
+    // Set hero image as loaded since it's now preloaded
       setHeroImageLoaded(true);
-    };
-    img.src = '/images/hero-image.webp';
+    
+    // Initialize responsive testing in development
+    initResponsiveTesting();
   }, []);
 
   // Lazy loading function for images
@@ -837,24 +826,49 @@ export default function App() {
           `}
         </script>
         
-        {/* Facebook Pixel - Only load if not blocked */}
+        {/* Facebook Pixel - Graceful fallback for ad blockers */}
         <script>
           {`
-            try {
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            (function() {
+              // Check if ad blocker is likely present
+              const isAdBlockerActive = () => {
+                try {
+                  const testAd = document.createElement('div');
+                  testAd.innerHTML = '&nbsp;';
+                  testAd.className = 'adsbox';
+                  testAd.style.position = 'absolute';
+                  testAd.style.left = '-999px';
+                  document.body.appendChild(testAd);
+                  const isBlocked = testAd.offsetHeight === 0;
+                  document.body.removeChild(testAd);
+                  return isBlocked;
+                } catch (e) {
+                  return true;
+                }
+              };
+
+              // Only attempt to load Facebook Pixel if ad blocker is not detected
+              if (!isAdBlockerActive()) {
+                try {
+                  !function(f,b,e,v,n,t,s) {
+                    if(f.fbq)return;n=f.fbq=function(){n.callMethod?
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
               if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
               n.queue=[];t=b.createElement(e);t.async=!0;
-              t.onerror=function(){console.warn('Facebook Pixel blocked by ad blocker');};
+                    t.onerror=function(){console.debug('Facebook Pixel blocked by ad blocker');};
               t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
+                    s.parentNode.insertBefore(t,s)
+                  }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+                  
               fbq('init', 'YOUR_PIXEL_ID');
               fbq('track', 'PageView');
             } catch(e) {
-              console.warn('Facebook Pixel initialization failed:', e);
+                  console.debug('Facebook Pixel initialization failed:', e);
             }
+              } else {
+                console.debug('Facebook Pixel skipped - ad blocker detected');
+              }
+            })();
           `}
         </script>
         <noscript>
@@ -949,108 +963,9 @@ export default function App() {
               </AnimatePresence>
             </div>
             
-            {/* Mobile Menu Button */}
-            <motion.button
-              className={`mobile-menu-btn ${isMobileMenuOpen ? 'active' : ''}`}
-              onClick={toggleMobileMenu}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Toggle mobile menu"
-            >
-              <span className="hamburger-line"></span>
-              <span className="hamburger-line"></span>
-              <span className="hamburger-line"></span>
-            </motion.button>
         </div>
         </div>
 
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              className="mobile-menu-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={closeMobileMenu}
-            >
-              <motion.div
-                className="mobile-menu"
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="mobile-menu-header">
-                  <img 
-                    src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
-                    alt="Awra Designs" 
-                    className="mobile-menu-logo" 
-                  />
-                  <motion.button
-                    className="mobile-menu-close"
-                    onClick={closeMobileMenu}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="Close mobile menu"
-                  >
-                    ✕
-                  </motion.button>
-                </div>
-
-                <nav className="mobile-menu-nav">
-                  {['home', 'about', 'services', 'works', 'pricing', 'contact'].map((section, index) => (
-                    <motion.a
-                      key={section}
-                      href={`#${section}`}
-                      className={`mobile-menu-link ${currentSection === section ? 'active' : ''}`}
-                      onClick={closeMobileMenu}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                      whileHover={{ x: 10 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {section === 'testimonials' ? 'Reviews' : 
-                       section === 'case-studies' ? 'Case Studies' :
-                       section.charAt(0).toUpperCase() + section.slice(1)}
-                    </motion.a>
-                  ))}
-                </nav>
-
-                <div className="mobile-menu-footer">
-                  <motion.button
-                    className="btn btn-primary mobile-menu-cta"
-                    onClick={() => {
-                      closeMobileMenu();
-                      setShowGetStarted(true);
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.6 }}
-                  >
-                    Get Started
-                  </motion.button>
-                  
-                  <motion.div
-                    className="mobile-menu-contact"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.7 }}
-                  >
-                    <p>Ready to transform your space?</p>
-                    <a href="tel:+251923814125" className="mobile-menu-phone">
-                      📞 +251 923 814 125
-                    </a>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.header>
 
       {/* Hero Section */}
