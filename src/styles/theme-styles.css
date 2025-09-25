@@ -150,6 +150,95 @@
   color: #ffd700 !important;
 }
 
+/* Light mode - Social media icons should be black */
+[data-theme="light"] .social-btn {
+  color: #212529 !important;
+}
+
+[data-theme="light"] .social-btn svg {
+  color: #212529 !important;
+  fill: #212529 !important;
+}
+
+/* Ensure social media icons are black in light mode with higher specificity */
+[data-theme="light"] .footer .social-btn {
+  color: #212529 !important;
+}
+
+[data-theme="light"] .footer .social-btn svg {
+  color: #212529 !important;
+  fill: #212529 !important;
+}
+
+/* Even more specific targeting for social media icons in footer */
+[data-theme="light"] .footer .social-media .social-btn {
+  color: #212529 !important;
+}
+
+[data-theme="light"] .footer .social-media .social-btn svg {
+  color: #212529 !important;
+  fill: #212529 !important;
+}
+
+/* Target the specific social media buttons */
+[data-theme="light"] .social-btn.facebook,
+[data-theme="light"] .social-btn.instagram,
+[data-theme="light"] .social-btn.tiktok,
+[data-theme="light"] .social-btn.telegram {
+  color: #212529 !important;
+}
+
+[data-theme="light"] .social-btn.facebook svg,
+[data-theme="light"] .social-btn.instagram svg,
+[data-theme="light"] .social-btn.tiktok svg,
+[data-theme="light"] .social-btn.telegram svg {
+  color: #212529 !important;
+  fill: #212529 !important;
+}
+
+/* Dark mode - Ensure social media icons remain white */
+[data-theme="dark"] .social-btn {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .social-btn svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+[data-theme="dark"] .footer .social-btn {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .footer .social-btn svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+[data-theme="dark"] .footer .social-media .social-btn {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .footer .social-media .social-btn svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+[data-theme="dark"] .social-btn.facebook,
+[data-theme="dark"] .social-btn.instagram,
+[data-theme="dark"] .social-btn.tiktok,
+[data-theme="dark"] .social-btn.telegram {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .social-btn.facebook svg,
+[data-theme="dark"] .social-btn.instagram svg,
+[data-theme="dark"] .social-btn.tiktok svg,
+[data-theme="dark"] .social-btn.telegram svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
 /* Dark mode - Black header and footer */
 [data-theme="dark"] .nav {
   background: #000000 !important;

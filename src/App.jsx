@@ -638,7 +638,10 @@ export default function App() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           >
-            <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" />
+            <img 
+              src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+              alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
+            />
           </motion.div>
           <motion.h2
             initial={{ opacity: 0 }}
@@ -873,7 +876,11 @@ export default function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-          <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" className="logo-img" />
+          <img 
+            src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+            alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
+            className="logo-img" 
+          />
           
           
           </motion.div>
@@ -976,7 +983,11 @@ export default function App() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mobile-menu-header">
-                  <img src="/images/LOGO.webp" alt="Awra Designs" className="mobile-menu-logo" />
+                  <img 
+                    src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+                    alt="Awra Designs" 
+                    className="mobile-menu-logo" 
+                  />
                   <motion.button
                     className="mobile-menu-close"
                     onClick={closeMobileMenu}
@@ -2949,7 +2960,11 @@ export default function App() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-          <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" className="footer-logo" />
+          <img 
+            src={theme === 'dark' ? "/images/LOGO 1.png" : "/images/LOGO 2.png"} 
+            alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
+            className="footer-logo" 
+          />
               <h3>Awra Finishing & Interior</h3>
               <p>Creating exceptional architectural spaces and compelling brands with professional design and premium finishing services.</p>
             </motion.div>
