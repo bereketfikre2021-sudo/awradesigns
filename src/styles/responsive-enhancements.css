@@ -17,6 +17,13 @@ html {
 body {
   overflow-x: hidden;
   min-width: 320px; /* Minimum supported width */
+  max-width: 100vw;
+}
+
+/* Prevent horizontal overflow */
+.App {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Container responsive utilities */

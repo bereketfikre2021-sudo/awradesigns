@@ -34,7 +34,10 @@ export const setupGlobalErrorHandler = () => {
           message.includes('loading css chunk') ||
           message.includes('chunk load error') ||
           message.includes('failed to load resource: net::err_blocked_by_client') ||
-          message.includes('fbevents.js')
+          message.includes('fbevents.js') ||
+          message.includes('facebook pixel') ||
+          message.includes('connect.facebook.net') ||
+          message.includes('facebook.com/tr')
         ) {
           event.preventDefault();
           return false;

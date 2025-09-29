@@ -9,25 +9,43 @@ import { initResponsiveTesting } from './utils/responsiveTest';
 import LazyImage from './components/LazyImage';
 import LazySection from './components/LazySection';
 import { ThemeToggle, useTheme } from './contexts/ThemeContext.jsx';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
+import LanguageSelector from './components/LanguageSelector.jsx';
+import AccessibilityDropdown from './components/AccessibilityDropdown.jsx';
+import SkipNavigation from './components/SkipNavigation.jsx';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation.js';
+import offlineManager from './utils/offlineManager.js';
+import GDPRConsent from './components/GDPRConsent.jsx';
+import SecureForm from './components/SecureForm.jsx';
 import { HoverGlow, RippleButton, ScrollAnimation } from './components/MicroInteractions.jsx';
 import WhyChooseUsLight from './components/WhyChooseUsLight.jsx';
 import './App.css';
 import './styles/WhyChooseUsLight.css';
 import './styles/responsive-enhancements.css';
 
-// Lazy load heavy components (commented out to avoid import errors)
-// const ThreeDScene = lazy(() => import('./components/ThreeDScene'));
-// const ARViewer = lazy(() => import('./components/ARViewer'));
-// const RoomConfigurator = lazy(() => import('./components/RoomConfigurator'));
-// const AIChatbot = lazy(() => import('./components/AIChatbot'));
-// const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+// Lazy load heavy components
+import { lazy, Suspense } from 'react';
+const ThreeDScene = lazy(() => import('./components/ThreeDScene'));
+const ARViewer = lazy(() => import('./components/ARViewer'));
+const RoomConfigurator = lazy(() => import('./components/RoomConfigurator'));
+const AIChatbot = lazy(() => import('./components/AIChatbot'));
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const ClientPortal = lazy(() => import('./components/ClientPortal'));
+const NotificationSettings = lazy(() => import('./components/NotificationSettings'));
+const PerformanceMonitor = lazy(() => import('./components/PerformanceMonitor'));
 
 
-export default function App() {
+const AppContent = () => {
   const [navSolid, setNavSolid] = useState(false);
   const [monthly, setMonthly] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme } = useTheme();
+  const { t, isRTL } = useLanguage();
+  useKeyboardNavigation();
+  
+  // Offline status
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   
   // Dynamic meta titles and descriptions for SEO
   const getPageMeta = (section) => {
@@ -83,6 +101,7 @@ export default function App() {
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showContactDropdown, setShowContactDropdown] = useState(false);
+  const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
 
   // SEO and Performance monitoring
   const currentMeta = getPageMeta(currentSection);
@@ -95,19 +114,48 @@ export default function App() {
   
   const performanceMetrics = usePerformanceMonitoring();
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside and handle ESC key for modals
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showContactDropdown && !event.target.closest('.nav-cta-dropdown')) {
         setShowContactDropdown(false);
       }
+      if (showFeaturesDropdown && !event.target.closest('.features-dropdown')) {
+        setShowFeaturesDropdown(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        // Close all modals and dropdowns
+        if (showBookingModal) {
+          setShowBookingModal(false);
+        } else if (showQuoteCalculator) {
+          setShowQuoteCalculator(false);
+        } else if (showPrivacyModal) {
+          setShowPrivacyModal(false);
+        } else if (showTermsModal) {
+          setShowTermsModal(false);
+        } else if (showModal) {
+          setShowModal(false);
+        } else if (showGetStarted) {
+          setShowGetStarted(false);
+        } else if (showContactDropdown) {
+          setShowContactDropdown(false);
+        } else if (showFeaturesDropdown) {
+          setShowFeaturesDropdown(false);
+        }
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showContactDropdown]);
+  }, [showContactDropdown, showFeaturesDropdown, showBookingModal, showQuoteCalculator, showPrivacyModal, showTermsModal, showModal, showGetStarted]);
 
 
   // Form states
@@ -193,6 +241,28 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Mobile menu functions
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   // Performance monitoring
   useEffect(() => {
     if (performance.frameRate < 20) {
@@ -200,6 +270,29 @@ export default function App() {
       // console.warn('Very low frame rate detected, reducing visual effects');
     }
   }, [performance.frameRate]);
+
+  // Online/Offline status monitoring
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      document.body.classList.remove('offline');
+      document.body.classList.add('online');
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      document.body.classList.remove('online');
+      document.body.classList.add('offline');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Optimized resource loading with connection-aware prefetching
   useEffect(() => {
@@ -320,11 +413,26 @@ export default function App() {
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In a real app, you would send the data to your backend
-      // Form submitted successfully
+      // Submit to Formspree
+      const response = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          projectType: contactForm.projectType,
+          message: contactForm.message,
+          _subject: 'New Contact Form Submission - Awra Finishing',
+          _replyto: contactForm.email,
+          _cc: contactForm.email
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Form submission failed');
+      }
       
       setFormSubmissions(prev => ({
         ...prev,
@@ -348,6 +456,7 @@ export default function App() {
       }, 5000);
       
     } catch (error) {
+      console.error('Form submission error:', error);
       setFormSubmissions(prev => ({
         ...prev,
         contact: { status: 'error', message: 'Sorry, there was an error. Please try again or contact us directly.' }
@@ -363,10 +472,29 @@ export default function App() {
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Booking form submitted successfully
+      // Submit to Formspree
+      const response = await fetch('https://formspree.io/f/YOUR_BOOKING_FORM_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: bookingForm.name,
+          phone: bookingForm.phone,
+          email: bookingForm.email,
+          service: bookingForm.service,
+          date: bookingForm.date,
+          time: bookingForm.time,
+          description: bookingForm.description,
+          _subject: 'New Consultation Booking - Awra Finishing',
+          _replyto: bookingForm.email,
+          _cc: bookingForm.email
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Booking submission failed');
+      }
       
       setFormSubmissions(prev => ({
         ...prev,
@@ -394,6 +522,7 @@ export default function App() {
       }, 3000);
       
     } catch (error) {
+      console.error('Booking submission error:', error);
       setFormSubmissions(prev => ({
         ...prev,
         booking: { status: 'error', message: 'Booking failed. Please try again or call us directly.' }
@@ -409,10 +538,22 @@ export default function App() {
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Newsletter subscription successful
+      // Submit to Formspree
+      const response = await fetch('https://formspree.io/f/YOUR_NEWSLETTER_FORM_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newsletterForm.email,
+          _subject: 'New Newsletter Subscription - Awra Finishing',
+          _replyto: newsletterForm.email
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Newsletter subscription failed');
+      }
       
       setFormSubmissions(prev => ({
         ...prev,
@@ -431,6 +572,7 @@ export default function App() {
       }, 4000);
       
     } catch (error) {
+      console.error('Newsletter subscription error:', error);
       setFormSubmissions(prev => ({
         ...prev,
         newsletter: { status: 'error', message: 'Subscription failed. Please try again.' }
@@ -446,10 +588,27 @@ export default function App() {
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Get Started form submitted successfully
+      // Submit to Formspree
+      const response = await fetch('https://formspree.io/f/YOUR_GET_STARTED_FORM_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: getStartedForm.name,
+          email: getStartedForm.email,
+          phone: getStartedForm.phone,
+          message: getStartedForm.message,
+          plan: selectedPlan?.name || 'Custom Plan',
+          _subject: 'New Get Started Request - Awra Finishing',
+          _replyto: getStartedForm.email,
+          _cc: getStartedForm.email
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Get Started request failed');
+      }
       
       setFormSubmissions(prev => ({
         ...prev,
@@ -474,6 +633,7 @@ export default function App() {
       }, 3000);
       
     } catch (error) {
+      console.error('Get Started submission error:', error);
       setFormSubmissions(prev => ({
         ...prev,
         getStarted: { status: 'error', message: 'Request failed. Please try again or contact us directly.' }
@@ -858,7 +1018,10 @@ export default function App() {
               n.callMethod.apply(n,arguments):n.queue.push(arguments)};
               if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
               n.queue=[];t=b.createElement(e);t.async=!0;
-                    t.onerror=function(){console.debug('Facebook Pixel blocked by ad blocker');};
+                    t.onerror=function(){
+                      // Silent error handling - no console output
+                      window.fbPixelError = true;
+                    };
               t.src=v;s=b.getElementsByTagName(e)[0];
                     s.parentNode.insertBefore(t,s)
                   }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
@@ -866,10 +1029,12 @@ export default function App() {
               fbq('init', 'YOUR_PIXEL_ID');
               fbq('track', 'PageView');
             } catch(e) {
-                  console.debug('Facebook Pixel initialization failed:', e);
+                  // Silent error handling - no console output
+                  window.fbPixelError = true;
             }
               } else {
-                console.debug('Facebook Pixel skipped - ad blocker detected');
+                // Ad blocker detected - set flag for other scripts
+                window.fbPixelBlocked = true;
               }
             })();
           `}
@@ -879,6 +1044,9 @@ export default function App() {
         </noscript>
         
       </Helmet>
+
+      <SkipNavigation />
+      <GDPRConsent />
 
       {/* Advanced Navigation */}
       <motion.header 
@@ -914,15 +1082,99 @@ export default function App() {
                 whileHover={{ y: -2 }}
                 whileTap={{ y: 0 }}
               >
-                {section === 'testimonials' ? 'Reviews' : 
-                 section === 'case-studies' ? 'Case Studies' :
-                 section.charAt(0).toUpperCase() + section.slice(1)}
+                {t(section)}
               </motion.a>
             ))}
         </nav>
 
           <div className="nav-controls">
-            <ThemeToggle className="nav-theme-toggle" size="medium" />
+            {/* Offline Status Indicator */}
+            {!isOnline && (
+              <motion.div
+                className="offline-indicator"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                title="You are offline"
+              >
+                🔌
+              </motion.div>
+            )}
+            
+            {/* Features Dropdown Menu */}
+            <div className="features-dropdown">
+            <motion.button
+                className="features-menu-btn"
+                onClick={() => setShowFeaturesDropdown(!showFeaturesDropdown)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label="Features Menu"
+                aria-expanded={showFeaturesDropdown}
+              >
+                ⚙️
+                <span className="dropdown-arrow">▼</span>
+            </motion.button>
+
+              <AnimatePresence>
+                {showFeaturesDropdown && (
+                  <>
+                    {/* Mobile backdrop overlay */}
+                    <motion.div
+                      className="features-dropdown-backdrop"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={() => setShowFeaturesDropdown(false)}
+                    />
+                    
+                    <motion.div
+                      className="features-dropdown-menu"
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                    {/* Language Selector */}
+                    <div className="feature-dropdown-section" onClick={(e) => e.stopPropagation()}>
+                      <div className="feature-section-title">Language</div>
+                      <LanguageSelector className="dropdown-language-selector" />
+                    </div>
+                    
+                    <div className="feature-dropdown-divider"></div>
+                    
+                    {/* Theme Toggle */}
+                    <div className="feature-dropdown-section" onClick={(e) => e.stopPropagation()}>
+                      <div className="feature-section-title">Theme</div>
+                      <ThemeToggle className="dropdown-theme-toggle" size="medium" />
+                    </div>
+                    
+                    <div className="feature-dropdown-divider"></div>
+                    
+                    {/* Accessibility Controls */}
+                    <div className="feature-dropdown-section" onClick={(e) => e.stopPropagation()}>
+                      <AccessibilityDropdown />
+                    </div>
+                    
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <motion.button
+              className={`mobile-menu-btn ${isMobileMenuOpen ? 'active' : ''}`}
+              onClick={toggleMobileMenu}
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="hamburger-line"></span>
+              <span className="hamburger-line"></span>
+              <span className="hamburger-line"></span>
+            </motion.button>
             <div className="nav-cta-dropdown">
               <motion.button
                 className="btn btn-primary nav-cta"
@@ -974,6 +1226,98 @@ export default function App() {
 
       </motion.header>
 
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            className="mobile-menu-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={closeMobileMenu}
+          >
+            <motion.div
+              className="mobile-menu"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Mobile Menu Header */}
+              <div className="mobile-menu-header">
+                <img 
+                  src={theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png"} 
+                  alt="Awra Finishing & Interior Logo" 
+                  className="mobile-menu-logo"
+                />
+                <motion.button
+                  className="mobile-menu-close"
+                  onClick={closeMobileMenu}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Close mobile menu"
+                >
+                  ✕
+                </motion.button>
+              </div>
+
+              {/* Mobile Menu Navigation */}
+              <nav className="mobile-menu-nav">
+                {['home', 'about', 'services', 'works', 'pricing', 'contact'].map((section, index) => (
+                  <motion.a
+                    key={section}
+                    href={`#${section}`}
+                    className={`mobile-menu-link ${currentSection === section ? 'active' : ''}`}
+                    onClick={closeMobileMenu}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ x: 10 }}
+                  >
+                    {section === 'testimonials' ? 'Reviews' : 
+                     section === 'case-studies' ? 'Case Studies' :
+                     section.charAt(0).toUpperCase() + section.slice(1)}
+                  </motion.a>
+                ))}
+              </nav>
+
+              {/* Mobile Menu Call-to-Action Buttons */}
+              <div className="mobile-menu-cta-section">
+                <motion.a
+                  href="tel:+251923814125"
+                  className="mobile-menu-cta"
+                  onClick={closeMobileMenu}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  📞 Call Now: +251 923 814 125
+                </motion.a>
+                
+                <motion.a
+                  href="https://wa.me/251923814125"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mobile-menu-whatsapp"
+                  onClick={closeMobileMenu}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  💬 WhatsApp Chat
+                </motion.a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
       <section id="home" className={`hero ${heroImageLoaded ? 'hero-loaded' : ''}`} ref={heroRef} role="main" aria-label="Main content">
         <div id="main-content" style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true"></div>
@@ -984,8 +1328,7 @@ export default function App() {
             transition={{ duration: 1, delay: 0.2 }}
             className="hero-title"
           >
-            The Future of
-            <span className="gradient-text"> Interior Design</span>
+            {t('heroTitle')}
           </motion.h1>
           
           <motion.p
@@ -994,7 +1337,7 @@ export default function App() {
             transition={{ duration: 1, delay: 0.4 }}
             className="hero-subtitle"
           >
-            Professional architectural design, interior planning, finishing work, and branding services
+            {t('heroSubtitle')}
           </motion.p>
           
           <motion.div
@@ -1005,21 +1348,22 @@ export default function App() {
           >
             <motion.a
               href="#contact"
-              className="btn btn-primary"
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(255, 215, 0, 0.3)" }}
+              className="btn btn-secondary"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Start Your Project
+              {t('startProject')}
             </motion.a>
             
             <motion.button
-              className="btn btn-primary"
+              className="btn btn-secondary"
               onClick={() => setShowBookingModal(true)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              📅 Book Consultation
+              📅 {t('bookConsultation')}
             </motion.button>
+            
           </motion.div>
 
         </animated.div>
@@ -2464,82 +2808,13 @@ export default function App() {
             </div>
           </div>
           
-          <div className="contact-form">
-            <form onSubmit={handleContactFormSubmit}>
-              <div className="form-group">
-                <label htmlFor="contactName">Your Name</label>
-                <input 
-                  type="text" 
-                  id="contactName" 
-                  name="contactName" 
-                  placeholder="Your Name" 
-                  value={contactForm.name}
-                  onChange={(e) => handleContactFormChange('name', e.target.value)}
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="contactEmail">Your Email</label>
-                <input 
-                  type="email" 
-                  id="contactEmail" 
-                  name="contactEmail" 
-                  placeholder="Your Email" 
-                  value={contactForm.email}
-                  onChange={(e) => handleContactFormChange('email', e.target.value)}
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="contactProjectType">Project Type</label>
-                <select 
-                  id="contactProjectType" 
-                  name="contactProjectType" 
-                  value={contactForm.projectType}
-                  onChange={(e) => handleContactFormChange('projectType', e.target.value)}
-                  required
-                >
-                  <option value="">Select project type</option>
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="office">Office</option>
-                  <option value="retail">Retail</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="contactMessage">Project Description</label>
-                <textarea 
-                  id="contactMessage" 
-                  name="contactMessage" 
-                  placeholder="Tell us about your vision..." 
-                  rows={4} 
-                  value={contactForm.message}
-                  onChange={(e) => handleContactFormChange('message', e.target.value)}
-                  required
-                ></textarea>
-              </div>
-              
-              {/* Form Status Message */}
-              {formSubmissions.contact.status !== 'idle' && (
-                <div className={`form-status ${formSubmissions.contact.status}`}>
-                  {formSubmissions.contact.status === 'loading' && <span className="loading-spinner">⏳</span>}
-                  {formSubmissions.contact.status === 'success' && <span className="success-icon">✅</span>}
-                  {formSubmissions.contact.status === 'error' && <span className="error-icon">❌</span>}
-                  {formSubmissions.contact.message}
-                </div>
-              )}
-              
-              <motion.button
-                type="submit"
-                className="btn btn-primary"
-                disabled={formSubmissions.contact.status === 'loading'}
-                whileHover={{ scale: formSubmissions.contact.status === 'loading' ? 1 : 1.05 }}
-                whileTap={{ scale: formSubmissions.contact.status === 'loading' ? 1 : 0.95 }}
-              >
-                {formSubmissions.contact.status === 'loading' ? 'Sending...' : 'Send Message'}
-              </motion.button>
-            </form>
-          </div>
+          <SecureForm 
+            onSubmit={async (secureData) => {
+              console.log('Secure form submitted:', secureData);
+              // Handle the secure form submission
+            }}
+            className="contact-form"
+          />
         </motion.div>
         
       </section>
@@ -3417,6 +3692,8 @@ export default function App() {
         )}
       </AnimatePresence>
 
+
+
       {/* Scroll to Top Button */}
       <AnimatePresence>
         {showScrollTop && (
@@ -3449,6 +3726,15 @@ export default function App() {
           </motion.button>
         )}
       </AnimatePresence>
+
     </div>
+  );
+};
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }
