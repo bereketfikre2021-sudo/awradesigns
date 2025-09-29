@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
     <title>Awra Finishing & Interior - Professional Architecture & Design in Addis Ababa</title>
     
     <!-- SEO Meta Tags -->
@@ -63,15 +63,13 @@
     <meta name="geo.position" content="9.1450;38.7756" />
     <meta name="ICBM" content="9.1450, 38.7756" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="./images/hero-image.webp" as="image" type="image/webp" />
-    <link rel="preload" href="/images/LOGO.webp" as="image" type="image/webp" />
-    <link rel="preload" href="./images/favicon-B-3evrBt.ico" as="image" type="image/x-icon" />
+    <!-- Preload critical resources - only for above-the-fold content -->
+    <link rel="preload" href="/images/hero-image.webp" as="image" type="image/webp" fetchpriority="high" />
     
-    <!-- Resource hints for better performance -->
-    <link rel="prefetch" href="./images/work-samples-1.webp" />
-    <link rel="prefetch" href="./images/work-samples-2.webp" />
-    <link rel="prefetch" href="./images/work-samples-3.webp" />
+    <!-- Resource hints for better performance - use prefetch for below-the-fold content -->
+    <link rel="prefetch" href="/images/work-samples-1.webp" />
+    <link rel="prefetch" href="/images/work-samples-2.webp" />
+    <link rel="prefetch" href="/images/work-samples-3.webp" />
     
     <!-- DNS Prefetch for external resources -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -118,13 +116,13 @@
     <link rel="canonical" href="https://awradesigns.com" />
     
     <!-- Favicon - Comprehensive Implementation -->
-    <link rel="icon" type="image/x-icon" href="./images/favicon-B-3evrBt.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon-16x16-BJ7RyVbh.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32-DE1krxpy.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon-DdLvSBPk.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="./images/android-chrome-192x192-Ca_E39Md.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="./images/android-chrome-512x512-CjWN40tG.png" />
-    <link rel="manifest" href="./assets/site-D1Ispbxf.webmanifest" />
+    <link rel="icon" type="image/x-icon" href="/images/favicon-B-3evrBt.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-BJ7RyVbh.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-DE1krxpy.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-DdLvSBPk.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192-Ca_E39Md.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/android-chrome-512x512-CjWN40tG.png" />
+    <link rel="manifest" href="/assets/site-D1Ispbxf.webmanifest" />
     
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -384,13 +382,13 @@
       }
     }
     </script>
-    <script type="module" crossorigin src="./assets/index-CiiVFH64.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/react-vendor-BG0u1ZPm.js">
-    <link rel="modulepreload" crossorigin href="./assets/three-vendor-CUuoe9Kk.js">
-    <link rel="modulepreload" crossorigin href="./assets/ui-vendor-B4DkqGOT.js">
-    <link rel="modulepreload" crossorigin href="./assets/animation-vendor-C9MzpNmv.js">
-    <link rel="stylesheet" crossorigin href="./css/index-D8FRrZja.css">
-  <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
+    <script type="module" crossorigin src="/assets/index-0ajy5bjB.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-BG0u1ZPm.js">
+    <link rel="modulepreload" crossorigin href="/assets/three-vendor-B1KaB6D2.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-B4DkqGOT.js">
+    <link rel="modulepreload" crossorigin href="/assets/animation-vendor-BBo2vOWn.js">
+    <link rel="stylesheet" crossorigin href="/css/index-DRE2rmv1.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
   </body>
