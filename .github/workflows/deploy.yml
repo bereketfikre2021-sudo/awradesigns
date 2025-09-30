@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     
     steps:
@@ -28,6 +28,25 @@ jobs:
     - name: Build project
       run: npm run build
     
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+        retention-days: 1
+
+  deploy-netlify:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ secrets.NETLIFY_AUTH_TOKEN != '' && secrets.NETLIFY_SITE_ID != '' }}
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+    
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v3.0
       with:
@@ -38,6 +57,18 @@ jobs:
       env:
         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+  deploy-vercel:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ secrets.VERCEL_TOKEN != '' && secrets.ORG_ID != '' && secrets.PROJECT_ID != '' }}
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
     
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v25
@@ -46,3 +77,39 @@ jobs:
         vercel-org-id: ${{ secrets.ORG_ID }}
         vercel-project-id: ${{ secrets.PROJECT_ID }}
         working-directory: ./
+
+  deploy-manual:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ secrets.NETLIFY_AUTH_TOKEN == '' || secrets.VERCEL_TOKEN == '' }}
+    
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-files
+        path: dist/
+    
+    - name: Deployment Instructions
+      run: |
+        echo "🚀 Build completed successfully!"
+        echo "📦 Build artifacts are ready in the dist/ folder"
+        echo ""
+        echo "To deploy manually:"
+        echo "1. Download the build artifacts from this workflow run"
+        echo "2. Upload the dist/ folder to your hosting provider"
+        echo ""
+        echo "To enable automatic deployment:"
+        echo "1. Go to your repository Settings > Secrets and variables > Actions"
+        echo "2. Add the following secrets:"
+        echo "   - NETLIFY_AUTH_TOKEN (for Netlify deployment)"
+        echo "   - NETLIFY_SITE_ID (for Netlify deployment)"
+        echo "   - VERCEL_TOKEN (for Vercel deployment)"
+        echo "   - ORG_ID (for Vercel deployment)"
+        echo "   - PROJECT_ID (for Vercel deployment)"
+        echo ""
+        echo "📋 Build Summary:"
+        echo "- Node.js version: 18"
+        echo "- Build command: npm run build"
+        echo "- Output directory: dist/"
+        echo "- Build artifacts: Available for download"
