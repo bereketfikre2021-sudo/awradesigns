@@ -68,8 +68,10 @@ const SecureForm = ({ onSubmit, className = '' }) => {
       newErrors.message = 'Message is required';
     }
     
-    // Phone validation (optional)
-    if (formData.phone && !dataEncryption.validatePhone(formData.phone)) {
+    // Phone validation (required)
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!dataEncryption.validatePhone(formData.phone)) {
       newErrors.phone = 'Please enter a valid phone number';
     }
     
@@ -145,79 +147,357 @@ const SecureForm = ({ onSubmit, className = '' }) => {
   };
 
   const showSuccessMessage = () => {
-    // Create success notification
-    const notification = document.createElement('div');
-    notification.className = 'form-success-notification';
-    notification.innerHTML = `
-      <div class="success-content">
-        <div class="success-icon">✅</div>
-        <h4>Message Sent Successfully!</h4>
-        <p>Thank you for your inquiry. We'll get back to you within 24 hours.</p>
+    // Create beautiful success modal with brand colors
+    const modal = document.createElement('div');
+    modal.className = 'beautiful-modal-overlay';
+    modal.innerHTML = `
+      <div class="beautiful-modal success-modal">
+        <div class="modal-header">
+          <div class="modal-icon success-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" fill="#ffd700" stroke="#ffd700" stroke-width="2"/>
+              <path d="M9 12l2 2 4-4" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <button class="modal-close" onclick="this.closest('.beautiful-modal-overlay').remove()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-content">
+          <h3>Message Sent Successfully!</h3>
+          <p>Thank you for your inquiry. We'll get back to you within 24 hours.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn success-btn" onclick="this.closest('.beautiful-modal-overlay').remove()">
+            Got it!
+          </button>
+        </div>
       </div>
     `;
     
-    // Style the notification
-    Object.assign(notification.style, {
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'white',
-      border: '1px solid #4CAF50',
-      borderRadius: '12px',
-      padding: '30px',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      zIndex: '10000',
-      maxWidth: '400px',
-      textAlign: 'center'
-    });
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-      if (document.body.contains(notification)) {
-        document.body.removeChild(notification);
+    // Add beautiful modal styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .beautiful-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
       }
-    }, 5000);
+      
+      .beautiful-modal {
+        background: #ffffff;
+        border-radius: 20px;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+        overflow: hidden;
+        border: 2px solid #ffd700;
+      }
+      
+      .modal-header {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+      }
+      
+      .success-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .modal-close {
+        background: rgba(0, 0, 0, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #000000;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+      
+      .modal-close:hover {
+        background: rgba(0, 0, 0, 0.3);
+        transform: scale(1.1);
+      }
+      
+      .modal-content {
+        padding: 32px 24px;
+        text-align: center;
+        background: #ffffff;
+      }
+      
+      .modal-content h3 {
+        color: #000000;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+        text-shadow: none;
+      }
+      
+      .modal-content p {
+        color: #333333;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 500;
+      }
+      
+      .modal-footer {
+        padding: 0 24px 24px 24px;
+        display: flex;
+        justify-content: center;
+        background: #ffffff;
+      }
+      
+      .modal-btn {
+        background: #ffd700;
+        color: #000000;
+        border: 2px solid #ffd700;
+        border-radius: 12px;
+        padding: 12px 32px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+      }
+      
+      .modal-btn:hover {
+        background: #ffed4e;
+        border-color: #ffed4e;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideIn {
+        from { 
+          opacity: 0;
+          transform: translateY(-50px) scale(0.9);
+        }
+        to { 
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+    
+    // Remove after 8 seconds
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+          if (document.body.contains(modal)) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+          }
+        }, 300);
+      }
+    }, 8000);
   };
 
   const showErrorMessage = (message) => {
-    // Create error notification
-    const notification = document.createElement('div');
-    notification.className = 'form-error-notification';
-    notification.innerHTML = `
-      <div class="error-content">
-        <div class="error-icon">❌</div>
-        <h4>Submission Failed</h4>
-        <p>${message || 'Please try again later.'}</p>
+    // Create beautiful warning modal with brand colors
+    const modal = document.createElement('div');
+    modal.className = 'beautiful-modal-overlay';
+    modal.innerHTML = `
+      <div class="beautiful-modal warning-modal">
+        <div class="modal-header warning-header">
+          <div class="modal-icon warning-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" fill="#ffd700" stroke="#ffd700" stroke-width="2"/>
+              <path d="M12 8v4M12 16h.01" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <button class="modal-close" onclick="this.closest('.beautiful-modal-overlay').remove()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-content">
+          <h3>Submission Failed</h3>
+          <p>${message || 'Please try again later or contact us directly.'}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn warning-btn" onclick="this.closest('.beautiful-modal-overlay').remove()">
+            Try Again
+          </button>
+        </div>
       </div>
     `;
     
-    // Style the notification
-    Object.assign(notification.style, {
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'white',
-      border: '1px solid #F44336',
-      borderRadius: '12px',
-      padding: '30px',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-      zIndex: '10000',
-      maxWidth: '400px',
-      textAlign: 'center'
-    });
-    
-    document.body.appendChild(notification);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-      if (document.body.contains(notification)) {
-        document.body.removeChild(notification);
+    // Add beautiful modal styles (reuse the same styles as success modal)
+    const style = document.createElement('style');
+    style.textContent = `
+      .beautiful-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
       }
-    }, 5000);
+      
+      .beautiful-modal {
+        background: #ffffff;
+        border-radius: 20px;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        animation: slideIn 0.3s ease;
+        overflow: hidden;
+        border: 2px solid #ffd700;
+      }
+      
+      .modal-header {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+      }
+      
+      .warning-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .modal-close {
+        background: rgba(0, 0, 0, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #000000;
+        transition: all 0.3s ease;
+        font-weight: bold;
+      }
+      
+      .modal-close:hover {
+        background: rgba(0, 0, 0, 0.3);
+        transform: scale(1.1);
+      }
+      
+      .modal-content {
+        padding: 32px 24px;
+        text-align: center;
+        background: #ffffff;
+      }
+      
+      .modal-content h3 {
+        color: #000000;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+        text-shadow: none;
+      }
+      
+      .modal-content p {
+        color: #333333;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0;
+        font-weight: 500;
+      }
+      
+      .modal-footer {
+        padding: 0 24px 24px 24px;
+        display: flex;
+        justify-content: center;
+        background: #ffffff;
+      }
+      
+      .modal-btn {
+        background: #ffd700;
+        color: #000000;
+        border: 2px solid #ffd700;
+        border-radius: 12px;
+        padding: 12px 32px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+      }
+      
+      .modal-btn:hover {
+        background: #ffed4e;
+        border-color: #ffed4e;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideIn {
+        from { 
+          opacity: 0;
+          transform: translateY(-50px) scale(0.9);
+        }
+        to { 
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
+    
+    // Remove after 10 seconds (longer for error messages)
+    setTimeout(() => {
+      if (document.body.contains(modal)) {
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+          if (document.body.contains(modal)) {
+            document.body.removeChild(modal);
+            document.head.removeChild(style);
+          }
+        }, 300);
+      }
+    }, 10000);
   };
 
   return (
@@ -273,7 +553,7 @@ const SecureForm = ({ onSubmit, className = '' }) => {
 
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="phone">Phone</label>
+          <label htmlFor="phone">Phone *</label>
           <input
             type="tel"
             id="phone"
@@ -282,6 +562,7 @@ const SecureForm = ({ onSubmit, className = '' }) => {
             onChange={handleInputChange}
             className={errors.phone ? 'error' : ''}
             placeholder="+251 9X XXX XXXX"
+            required
           />
           {errors.phone && <span className="error-message">{errors.phone}</span>}
         </div>
@@ -352,16 +633,12 @@ const SecureForm = ({ onSubmit, className = '' }) => {
           rows="5"
           required
         />
+        <div className="character-count">
+          {formData.message.length} characters
+        </div>
         {errors.message && <span className="error-message">{errors.message}</span>}
       </div>
 
-      {/* Privacy Notice */}
-      <div className="privacy-notice">
-        <p>
-          🔒 Your information is encrypted and secure. We respect your privacy and 
-          will never share your data with third parties without your consent.
-        </p>
-      </div>
 
       {/* Submit Button */}
       <motion.button
@@ -378,7 +655,7 @@ const SecureForm = ({ onSubmit, className = '' }) => {
           </>
         ) : (
           <>
-            🔒 Send Secure Message
+            Send
           </>
         )}
       </motion.button>

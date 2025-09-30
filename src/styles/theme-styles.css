@@ -1016,3 +1016,47 @@
     height: 26px;
   }
 }
+
+/* Light mode - Footer button styling for better readability */
+[data-theme="light"] .footer-btn {
+  background: #ffd700 !important;
+  color: #000000 !important;
+  border: 2px solid #ffd700 !important;
+}
+
+[data-theme="light"] .footer-btn:hover {
+  background: #ffed4e !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4) !important;
+}
+
+[data-theme="light"] .footer-btn .whatsapp-icon {
+  color: #000000 !important;
+  fill: #000000 !important;
+}
+
+/* Additional light mode footer button text fixes with higher specificity */
+[data-theme="light"] .footer .footer-btn {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer .footer-btn:hover {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer .footer-btn:focus {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer .footer-btn:active {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer .footer-btn * {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer .footer-btn svg {
+  color: #000000 !important;
+  fill: #000000 !important;
+}

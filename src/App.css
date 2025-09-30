@@ -1157,16 +1157,27 @@ img[loading="lazy"].loaded {
   font-size: 0.9rem;
 }
 
-/* Hero action buttons specific styling */
+/* Simple & Beautiful Hero Buttons - Brand Colors Only */
 .hero-actions .btn {
-  height: 52px; /* Fixed height for all hero buttons */
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  color: #ffd700;
+  border: 2px solid #ffd700;
 }
 
 .btn::before {
@@ -1236,25 +1247,81 @@ img[loading="lazy"].loaded {
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 2px solid rgba(255, 215, 0, 0.6);
-  backdrop-filter: blur(20px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+/* Simple & Elegant Hero Button Styles */
+.hero-actions .btn-secondary {
+  background: transparent;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.8);
-  transform: translateY(-4px) scale(1.02);
+.hero-actions .btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffd700;
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.hero-actions .btn-secondary::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 215, 0, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.4s ease;
+}
+
+.hero-actions .btn-secondary:hover {
+  background: #ffd700;
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+}
+
+.hero-actions .btn-secondary:hover::before {
+  transform: scaleX(1);
+}
+
+.hero-actions .btn-secondary:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+.hero-actions .btn-secondary:active {
+  transform: translateY(0px);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+
+/* Simple & Elegant Animations */
+@keyframes gentleGlow {
+  0%, 100% { 
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+  }
+  50% { 
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+  }
+}
+
+/* Simple focus state */
+.hero-actions .btn-secondary:focus {
+  outline: none;
   box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(255, 215, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #ffd700;
+    0 8px 25px rgba(255, 215, 0, 0.4),
+    0 0 0 3px rgba(255, 215, 0, 0.3);
 }
 
 /* Services Section */
@@ -1523,7 +1590,7 @@ img[loading="lazy"].loaded {
   }
   
   .hero-actions .btn {
-    height: 52px;
+    height: 56px;
   }
   
   .btn {
@@ -1642,8 +1709,7 @@ img[loading="lazy"].loaded {
   }
   
   .contact-methods {
-    grid-template-columns: 1fr;
-    gap: var(--space-sm);
+    gap: var(--space-md);
   }
   
   /* Modals */
@@ -1744,12 +1810,12 @@ img[loading="lazy"].loaded {
   
   /* Contact */
   .contact-methods {
-    grid-template-columns: 1fr;
-    gap: var(--space-sm);
+    gap: var(--space-md);
   }
   
   .contact-method {
-    padding: var(--space-sm);
+    padding: var(--space-md);
+    min-height: 70px;
   }
   
   /* Footer */
@@ -1984,7 +2050,7 @@ img[loading="lazy"].loaded {
   }
   
   .hero-actions .btn {
-    height: 52px;
+    height: 56px;
   }
 }
 
@@ -1998,7 +2064,7 @@ img[loading="lazy"].loaded {
   }
   
   .hero-actions .btn {
-    height: 52px;
+    height: 56px;
   }
 }
 
@@ -2725,21 +2791,22 @@ input:checked + .slider:before {
 }
 
 .contact-methods {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-md);
 }
 
 .contact-method {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
+  gap: var(--space-md);
+  padding: var(--space-lg);
   background: var(--surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   transition: var(--transition-normal);
   cursor: pointer;
+  min-height: 80px;
 }
 
 .contact-method:hover {
@@ -2749,28 +2816,30 @@ input:checked + .slider:before {
 }
 
 .contact-icon {
-  font-size: var(--font-size-lg);
-  width: 40px;
-  height: 40px;
+  font-size: var(--font-size-xl);
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--primary);
   border-radius: var(--radius-full);
   flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
 
 .contact-method h4 {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  margin-bottom: 2px;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  margin-bottom: 4px;
   color: var(--text);
 }
 
 .contact-method p {
   color: var(--text-secondary);
   margin: 0;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
 }
 
 .contact-form {
@@ -3255,6 +3324,32 @@ input:checked + .slider:before {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+
+/* Light mode footer button text fix */
+[data-theme="light"] .footer-btn {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer-btn:hover {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer-btn:focus {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer-btn:active {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer-btn * {
+  color: #000000 !important;
+}
+
+[data-theme="light"] .footer-btn svg {
+  color: #000000 !important;
+  fill: #000000 !important;
 }
 
 .social-links a {
@@ -6988,12 +7083,12 @@ input:checked + .slider:before {
   }
   
   .contact-methods {
-    grid-template-columns: 1fr;
-    gap: var(--space-sm);
+    gap: var(--space-md);
   }
   
   .contact-method {
-    padding: var(--space-sm);
+    padding: var(--space-md);
+    min-height: 70px;
   }
   
   .ar-instructions,
@@ -8437,8 +8532,7 @@ input:checked + .slider:before {
   
   /* Fix contact section */
   .contact-methods {
-    grid-template-columns: 1fr !important;
-    gap: var(--space-lg) !important;
+    gap: var(--space-md) !important;
   }
   
   /* Fix footer */
@@ -11896,6 +11990,14 @@ body.offline::before {
   color: #e74c3c;
   font-size: 12px;
   margin-top: 4px;
+}
+
+.character-count {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+  text-align: right;
+  font-style: italic;
 }
 
 .privacy-notice {

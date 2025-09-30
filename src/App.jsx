@@ -163,6 +163,7 @@ const AppContent = () => {
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
+    phone: '',
     projectType: '',
     message: ''
   });

@@ -18,8 +18,8 @@ export const ThemeProvider = ({ children }) => {
   // Load theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('awra-theme');
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
+    // Default to dark theme if no saved preference
+    const initialTheme = savedTheme || 'dark';
     
     setTheme(initialTheme);
     setIsLoaded(true);
@@ -42,15 +42,13 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // Listen for system theme changes
+  // Listen for system theme changes (only if user hasn't set a preference)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e) => {
-      if (!localStorage.getItem('awra-theme')) {
-        const systemTheme = e.matches ? 'dark' : 'light';
-        setTheme(systemTheme);
-        document.documentElement.setAttribute('data-theme', systemTheme);
-      }
+      // Only follow system theme if user hasn't explicitly set a preference
+      // and we want to keep dark as default, so we'll ignore system changes
+      // unless user has explicitly chosen to follow system theme
     };
 
     mediaQuery.addEventListener('change', handleChange);
