@@ -3,7 +3,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: any;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -215,7 +215,7 @@ export const measurePerformance = (name: string, fn: () => void): void => {
   console.log(`${name} took ${end - start} milliseconds`);
 };
 
-export const createPerformanceObserver = (callback: (entries: PerformanceEntry[]) => void) => {
+export const createPerformanceObserver = (callback: any) => {
   if ('PerformanceObserver' in window) {
     const observer = new PerformanceObserver(callback);
     observer.observe({ entryTypes: ['measure', 'navigation', 'paint'] });
@@ -228,8 +228,8 @@ export const createPerformanceObserver = (callback: (entries: PerformanceEntry[]
 export const createErrorBoundary = (error: Error, errorInfo: any) => {
   console.error('Error Boundary caught an error:', error, errorInfo);
   // Send to error reporting service
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'exception', {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'exception', {
       description: error.message,
       fatal: false,
     });

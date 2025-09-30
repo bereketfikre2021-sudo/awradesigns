@@ -102,7 +102,6 @@ const AppContent = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showContactDropdown, setShowContactDropdown] = useState(false);
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   // SEO and Performance monitoring
   const currentMeta = getPageMeta(currentSection);
@@ -197,6 +196,7 @@ const AppContent = () => {
   });
 
   // Beautiful Modal System
+  const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({
     title: '',
     message: '',

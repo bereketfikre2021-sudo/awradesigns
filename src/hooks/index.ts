@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useGesture } from 'react-use-gesture';
-import { useSpring, animated } from 'react-spring';
+import { useSpring } from 'react-spring';
 import { utils } from '../utils';
 
 // Performance Hook
@@ -414,7 +414,7 @@ export const useWebGL = () => {
 
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     setIsSupported(!!gl);
-    setContext(gl);
+    setContext(gl as WebGLRenderingContext | null);
   }, []);
 
   return { isSupported, context, canvasRef };
@@ -497,7 +497,7 @@ export const useClipboard = () => {
 };
 
 // Lazy Loading Hook with Performance Optimization
-export const useLazyLoading = (options = {}) => {
+export const useLazyLoading = (options: any = {}) => {
   const {
     threshold = 0.1,
     rootMargin = '50px',
@@ -546,14 +546,14 @@ export const useLazyLoading = (options = {}) => {
 };
 
 // Image Lazy Loading Hook
-export const useLazyImage = (src, options = {}) => {
+export const useLazyImage = (src: string, options: any = {}) => {
   const {
     threshold = 0.1,
     rootMargin = '50px',
     placeholder = null
   } = options;
 
-  const [imageSrc, setImageSrc] = useState(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -589,7 +589,7 @@ export const useLazyImage = (src, options = {}) => {
 };
 
 // Component Lazy Loading Hook
-export const useLazyComponent = (options = {}) => {
+export const useLazyComponent = (options: any = {}) => {
   const {
     threshold = 0.1,
     rootMargin = '100px',
@@ -625,7 +625,7 @@ export const useLazyComponent = (options = {}) => {
 };
 
 // SEO Hook for dynamic meta tags
-export const useSEO = (title, description, keywords = '', image = '') => {
+export const useSEO = (title: string, description: string, keywords: string = '', image: string = '') => {
   useEffect(() => {
     // Update document title
     if (title) {
@@ -721,6 +721,7 @@ export const usePerformanceMonitoring = () => {
 };
 
 // Import focus management hooks
+// @ts-ignore
 import {
   useFocusTrap,
   useFocusRestoration,
