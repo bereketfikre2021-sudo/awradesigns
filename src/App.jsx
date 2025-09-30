@@ -791,7 +791,11 @@ const AppContent = () => {
               src={theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png"} 
               alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo"
               onError={(e) => {
+                console.log('Loading logo error - theme:', theme, 'attempted src:', e.target.src);
                 e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+              }}
+              onLoad={() => {
+                console.log('Loading logo loaded successfully - theme:', theme, 'src:', theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png");
               }}
             />
           </motion.div>
@@ -1066,7 +1070,11 @@ const AppContent = () => {
             alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
             className="logo-img"
             onError={(e) => {
+              console.log('Header logo error - theme:', theme, 'attempted src:', e.target.src);
               e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+            }}
+            onLoad={() => {
+              console.log('Header logo loaded successfully - theme:', theme, 'src:', theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png");
             }}
           />
           
@@ -3161,7 +3169,11 @@ const AppContent = () => {
             alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" 
             className="footer-logo"
             onError={(e) => {
+              console.log('Footer logo error - theme:', theme, 'attempted src:', e.target.src);
               e.target.src = theme === 'dark' ? "/images/LOGO-2.png" : "/images/LOGO-1.png";
+            }}
+            onLoad={() => {
+              console.log('Footer logo loaded successfully - theme:', theme, 'src:', theme === 'dark' ? "/images/LOGO-1.png" : "/images/LOGO-2.png");
             }}
           />
               <h3>Awra Finishing & Interior</h3>
