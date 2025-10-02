@@ -340,18 +340,8 @@ class OfflineManager {
   }
 
   async submitForm(formData) {
-    // Determine which Formspree endpoint to use based on form type
-    let endpoint = 'https://formspree.io/f/YOUR_CONTACT_FORM_ID';
-    
-    if (formData._subject && formData._subject.includes('Booking')) {
-      endpoint = 'https://formspree.io/f/YOUR_BOOKING_FORM_ID';
-    } else if (formData._subject && formData._subject.includes('Newsletter')) {
-      endpoint = 'https://formspree.io/f/YOUR_NEWSLETTER_FORM_ID';
-    } else if (formData._subject && formData._subject.includes('Get Started')) {
-      endpoint = 'https://formspree.io/f/YOUR_GET_STARTED_FORM_ID';
-    } else if (formData._subject && formData._subject.includes('Secure')) {
-      endpoint = 'https://formspree.io/f/YOUR_SECURE_FORM_ID';
-    }
+    // Use the main Formspree endpoint for all form types
+    const endpoint = 'https://formspree.io/f/mrbykzlb';
     
     const response = await fetch(endpoint, {
       method: 'POST',

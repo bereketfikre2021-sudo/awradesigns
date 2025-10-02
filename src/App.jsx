@@ -6,8 +6,11 @@ import { useDevice, usePerformance, useAnimatedInView, useLazyLoading, useLazyIm
 import { utils } from './utils';
 // import { preloadCriticalResources, prefetchResources, optimizeForConnection } from './utils/resourceLoader';
 // import { initResponsiveTesting } from './utils/responsiveTest';
-import LazyImage from './components/LazyImage';
+// import LazyImage from './components/LazyImage'; // Removed - using regular img tags instead
 import LazySection from './components/LazySection';
+import Counter from './components/Counter';
+import SimpleCounter from './components/SimpleCounter';
+import SuccessModal from './components/SuccessModal';
 import { ThemeToggle, useTheme } from './contexts/ThemeContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -87,15 +90,8 @@ const AppContent = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [showQuoteCalculator, setShowQuoteCalculator] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [quoteData, setQuoteData] = useState({
-    service: '',
-    area: '',
-    complexity: 'medium',
-    timeline: 'normal'
-  });
   
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const [loadedImages, setLoadedImages] = useState(new Set());
@@ -131,8 +127,6 @@ const AppContent = () => {
         // Close all modals and dropdowns
         if (showBookingModal) {
           setShowBookingModal(false);
-        } else if (showQuoteCalculator) {
-          setShowQuoteCalculator(false);
         } else if (showPrivacyModal) {
           setShowPrivacyModal(false);
         } else if (showTermsModal) {
@@ -156,7 +150,7 @@ const AppContent = () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showContactDropdown, showFeaturesDropdown, showBookingModal, showQuoteCalculator, showPrivacyModal, showTermsModal, showModal, showGetStarted]);
+  }, [showContactDropdown, showFeaturesDropdown, showBookingModal, showPrivacyModal, showTermsModal, showModal, showGetStarted]);
 
 
   // Form states
@@ -195,6 +189,12 @@ const AppContent = () => {
     booking: { status: 'idle', message: '' },
     newsletter: { status: 'idle', message: '' },
     getStarted: { status: 'idle', message: '' }
+  });
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalContent, setSuccessModalContent] = useState({
+    title: '',
+    message: ''
   });
 
   // Beautiful Modal System
@@ -337,44 +337,6 @@ const AppContent = () => {
     setActiveFilter(filter);
   };
 
-  // Quote Calculator
-  const calculateQuote = () => {
-    const basePrices = {
-      'architectural': 150,
-      'interior': 100,
-      'finishing': 80,
-      'branding': 60,
-      'full-service': 200
-    };
-
-    const complexityMultipliers = {
-      'simple': 0.8,
-      'medium': 1.0,
-      'complex': 1.5
-    };
-
-    const timelineMultipliers = {
-      'urgent': 1.3,
-      'normal': 1.0,
-      'flexible': 0.9
-    };
-
-    if (!quoteData.service || !quoteData.area) return 0;
-
-    const basePrice = basePrices[quoteData.service] || 100;
-    const area = parseFloat(quoteData.area) || 0;
-    const complexity = complexityMultipliers[quoteData.complexity] || 1.0;
-    const timeline = timelineMultipliers[quoteData.timeline] || 1.0;
-
-    return Math.round(basePrice * area * complexity * timeline);
-  };
-
-  const handleQuoteInputChange = (field, value) => {
-    setQuoteData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   // Form input handlers
   const handleContactFormChange = (field, value) => {
@@ -408,6 +370,16 @@ const AppContent = () => {
   // Form submission handlers
   const handleContactFormSubmit = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!contactForm.name.trim() || !contactForm.email.trim() || !contactForm.message.trim()) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please fill in all required fields.' }
+      }));
+      return;
+    }
+
     setFormSubmissions(prev => ({
       ...prev,
       contact: { status: 'loading', message: 'Sending message...' }
@@ -415,7 +387,7 @@ const AppContent = () => {
 
     try {
       // Submit to Formspree
-      const response = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -427,18 +399,22 @@ const AppContent = () => {
           message: contactForm.message,
           _subject: 'New Contact Form Submission - Awra Finishing',
           _replyto: contactForm.email,
-          _cc: contactForm.email
+          _cc: contactForm.email,
+          _gotcha: '', // Honeypot field for spam protection
+          _format: 'json' // Request JSON response
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Form submission failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Form submission failed');
       }
       
-      setFormSubmissions(prev => ({
-        ...prev,
-        contact: { status: 'success', message: 'Thank you! We\'ll get back to you within 24 hours.' }
-      }));
+      setSuccessModalContent({
+        title: 'Message Sent Successfully!',
+        message: 'Thank you for your inquiry. We\'ll get back to you within 24 hours with a detailed response about your project.'
+      });
+      setShowSuccessModal(true);
       
       // Reset form
       setContactForm({
@@ -448,13 +424,7 @@ const AppContent = () => {
         message: ''
       });
       
-      // Clear success message after 5 seconds
-      setTimeout(() => {
-        setFormSubmissions(prev => ({
-          ...prev,
-          contact: { status: 'idle', message: '' }
-        }));
-      }, 5000);
+      // Form will be reset and success modal will be shown
       
     } catch (error) {
       console.error('Form submission error:', error);
@@ -474,7 +444,7 @@ const AppContent = () => {
 
     try {
       // Submit to Formspree
-      const response = await fetch('https://formspree.io/f/YOUR_BOOKING_FORM_ID', {
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -540,7 +510,7 @@ const AppContent = () => {
 
     try {
       // Submit to Formspree
-      const response = await fetch('https://formspree.io/f/YOUR_NEWSLETTER_FORM_ID', {
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -590,7 +560,7 @@ const AppContent = () => {
 
     try {
       // Submit to Formspree
-      const response = await fetch('https://formspree.io/f/YOUR_GET_STARTED_FORM_ID', {
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1505,15 +1475,21 @@ const AppContent = () => {
                   </p>
                   <div className="showcase-stats">
                     <div className="stat-item">
-                      <span className="stat-number">100+</span>
+                      <span className="stat-number">
+                        <SimpleCounter end={100} suffix="+" duration={2500} delay={0.2} />
+                      </span>
                       <span className="stat-label">Projects Completed</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">50+</span>
+                      <span className="stat-number">
+                        <SimpleCounter end={50} suffix="+" duration={2500} delay={0.4} />
+                      </span>
                       <span className="stat-label">Happy Clients</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-number">5+</span>
+                      <span className="stat-number">
+                        <SimpleCounter end={5} suffix="+" duration={2500} delay={0.6} />
+                      </span>
                       <span className="stat-label">Years Experience</span>
                     </div>
                   </div>
@@ -1772,29 +1748,95 @@ const AppContent = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             viewport={{ once: true }}
           >
+            <div className="process-header">
             <h3>Our Process</h3>
+              <p className="process-subtitle">From concept to completion, we ensure every step is executed with precision and care</p>
+            </div>
             <div className="process-steps">
-              <div className="process-step">
+              <motion.div 
+                className="process-step"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
+                <div className="step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
                 <div className="step-number">01</div>
                 <h4>Consultation</h4>
-                <p>Understanding your vision and requirements</p>
+                <p>Understanding your vision and requirements through detailed discussions and site analysis</p>
+                <div className="step-duration">1-2 days</div>
+              </motion.div>
+              
+              <motion.div 
+                className="process-step"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
+                <div className="step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
                   </div>
-              <div className="process-step">
                 <div className="step-number">02</div>
                 <h4>Design</h4>
-                <p>Creating detailed plans and 3D visualizations</p>
+                <p>Creating detailed plans and 3D visualizations that bring your vision to life</p>
+                <div className="step-duration">3-5 days</div>
+              </motion.div>
+              
+              <motion.div 
+                className="process-step"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
+                <div className="step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
                   </div>
-              <div className="process-step">
                 <div className="step-number">03</div>
                 <h4>Execution</h4>
-                <p>Professional implementation with quality assurance</p>
+                <p>Professional implementation with quality assurance and regular progress updates</p>
+                <div className="step-duration">2-4 weeks</div>
+              </motion.div>
+              
+              <motion.div 
+                className="process-step"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
+                <div className="step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                    <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"/>
+                    <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"/>
+                  </svg>
                 </div>
-              <div className="process-step">
                 <div className="step-number">04</div>
                 <h4>Delivery</h4>
-                <p>Final inspection and project handover</p>
+                <p>Final inspection and project handover with comprehensive documentation</p>
+                <div className="step-duration">1 day</div>
+              </motion.div>
                 </div>
-        </div>
+            
           </motion.div>
         </motion.div>
       </section>
@@ -1826,7 +1868,9 @@ const AppContent = () => {
         
         <div className="works-grid">
           <AnimatePresence key={activeFilter}>
-            {filteredProjects.map((project, index) => (
+            {filteredProjects.map((project, index) => {
+              console.log('Rendering portfolio project:', project.title, 'Image path:', project.image);
+              return (
               <motion.div
                 key={project.id}
                 className={`work-card ${project.isFeatured ? 'featured' : ''}`}
@@ -1838,15 +1882,20 @@ const AppContent = () => {
                 whileHover={{ y: -10, scale: 1.02 }}
               >
               <div className="work-image">
-                <LazyImage 
-                  src={project.image} 
+                <img 
+                  src={`https://picsum.photos/400/300?random=${project.id}`}
                   alt={`${project.title} - ${project.category} project by Awra Designs`}
-                  placeholder="Loading project image..."
-                  threshold={0.1}
-                  rootMargin="50px"
+                  loading="eager"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onLoad={() => {
+                    console.log('✅ Portfolio image loaded successfully:', project.id);
+                    handleImageLoad(project.image);
+                  }}
+                  onError={(e) => {
+                    console.error('❌ Portfolio image failed to load:', e.target.src);
+                    console.error('Full error details:', e);
+                  }}
                 />
-                <div className="work-overlay">
-                </div>
                 {project.isFeatured && <div className="featured-badge">⭐ Featured</div>}
               </div>
               
@@ -1869,7 +1918,8 @@ const AppContent = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+            );
+            })}
           </AnimatePresence>
         </div>
       </section>
@@ -1904,23 +1954,6 @@ const AppContent = () => {
           <span className={monthly ? 'active' : ''}>Monthly</span>
         </motion.div>
         
-        <motion.div
-          className="quote-calculator-cta"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <p>Need a custom quote? Use our instant calculator!</p>
-          <motion.button
-            className="btn btn-primary"
-            onClick={() => setShowQuoteCalculator(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            💰 Get Instant Quote
-          </motion.button>
-        </motion.div>
         
         <div className="pricing-grid">
           {pricingPlans.map((plan, idx) => (
@@ -1993,14 +2026,15 @@ const AppContent = () => {
               whileHover={{ y: -10 }}
             >
               <div className="case-study-image">
-                <LazyImage 
-                  src="/images/work-samples-1.webp" 
+                <img 
+                  src="https://picsum.photos/600/400?random=1" 
                   alt="Modern office interior design with contemporary furniture, glass partitions, and professional lighting - Awra Designs portfolio"
-                  placeholder="Loading case study..."
-                  threshold={0.1}
-                  rootMargin="100px"
+                  className="case-study-img"
                   onLoad={() => {
                     handleImageLoad("/images/work-samples-1.webp");
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', e.target.src);
                   }}
                 />
                 <div className="case-study-overlay">
@@ -2052,14 +2086,15 @@ const AppContent = () => {
               whileHover={{ y: -10 }}
             >
               <div className="case-study-image">
-                <LazyImage 
-                  src="/images/work-samples-2.webp" 
+                <img 
+                  src="https://picsum.photos/600/400?random=2" 
                   alt="Luxury residential interior design featuring elegant living space with premium finishes, modern furniture, and sophisticated lighting - Awra Designs"
-                  placeholder="Loading case study..."
-                  threshold={0.1}
-                  rootMargin="100px"
+                  className="case-study-img"
                   onLoad={() => {
                     handleImageLoad("/images/work-samples-2.webp");
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', e.target.src);
                   }}
                 />
                 <div className="case-study-overlay">
@@ -2132,11 +2167,10 @@ const AppContent = () => {
                   src="/images/team-photos/tesfahun-tsegaye.jpg" 
                   alt="Tesfahun Tsegaye - Founder & Lead Architect"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    console.error('Team photo failed to load:', e.target.src);
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                   }}
                 />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍💼</div>
               </div>
               <div className="member-info">
                 <h3>Tesfahun Tsegaye</h3>
@@ -2163,11 +2197,10 @@ const AppContent = () => {
                   src="/images/team-photos/sarah-bekele.jpg" 
                   alt="Sarah Bekele - Senior Interior Designer"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    console.error('Team photo failed to load:', e.target.src);
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                   }}
                 />
-                <div className="avatar-fallback" style={{display: 'none'}}>👩‍🎨</div>
               </div>
               <div className="member-info">
                 <h3>Sarah Bekele</h3>
@@ -2194,11 +2227,10 @@ const AppContent = () => {
                   src="/images/team-photos/daniel-haile.jpg" 
                   alt="Daniel Haile - Master Craftsman"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    console.error('Team photo failed to load:', e.target.src);
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                   }}
                 />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍🔧</div>
               </div>
               <div className="member-info">
                 <h3>Daniel Haile</h3>
@@ -2225,11 +2257,10 @@ const AppContent = () => {
                   src="/images/team-photos/bereket-fikre.jpg" 
                   alt="Bereket Fikre - Expert Graphic Designer"
                   onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
+                    console.error('Team photo failed to load:', e.target.src);
+                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                   }}
                 />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍🎨</div>
               </div>
               <div className="member-info">
                 <h3>Bereket Fikre</h3>
@@ -2277,11 +2308,10 @@ const AppContent = () => {
                     src="/images/client-photos/michael-tesfaye.jpg" 
                     alt="Michael Tesfaye - CEO, Tech Solutions Ethiopia"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      console.error('Client photo failed to load:', e.target.src);
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                     }}
                   />
-                  <div className="avatar-fallback" style={{display: 'none'}}>👨‍💼</div>
                 </div>
                 <div className="author-info">
                   <h4>Michael Tesfaye</h4>
@@ -2308,11 +2338,10 @@ const AppContent = () => {
                     src="/images/client-photos/sarah-bekele.jpg" 
                     alt="Sarah Bekele - Homeowner, Bole"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      console.error('Client photo failed to load:', e.target.src);
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                     }}
                   />
-                  <div className="avatar-fallback" style={{display: 'none'}}>👩‍💼</div>
                 </div>
                 <div className="author-info">
                   <h4>Sarah Bekele</h4>
@@ -2339,11 +2368,10 @@ const AppContent = () => {
                     src="/images/client-photos/daniel-haile.jpg" 
                     alt="Daniel Haile - Restaurant Owner, Kazanchis"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
+                      console.error('Client photo failed to load:', e.target.src);
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y0ZjRmNCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+QXZhdGFyPC90ZXh0Pjwvc3ZnPg==';
                     }}
                   />
-                  <div className="avatar-fallback" style={{display: 'none'}}>👨‍💻</div>
                 </div>
                 <div className="author-info">
                   <h4>Daniel Haile</h4>
@@ -2379,7 +2407,7 @@ const AppContent = () => {
             >
               <div className="blog-image">
                 <img 
-                  src="/images/work-samples-1.webp" 
+                  src="https://picsum.photos/500/300?random=3" 
                   alt="Modern interior design trends showcasing contemporary office space with clean lines, natural lighting, and minimalist furniture arrangement"
                   loading="eager"
                   onLoad={() => {
@@ -2416,7 +2444,7 @@ const AppContent = () => {
             >
               <div className="blog-image">
                 <img 
-                  src="/images/work-samples-2.webp" 
+                  src="https://picsum.photos/500/300?random=4" 
                   alt="Architectural planning guide featuring residential building design with modern facade, structural elements, and professional architectural drawings"
                   loading="eager"
                   onLoad={() => {
@@ -2453,7 +2481,7 @@ const AppContent = () => {
             >
               <div className="blog-image">
                 <img 
-                  src="/images/work-samples-3.webp" 
+                  src="https://picsum.photos/500/300?random=5" 
                   alt="Color psychology in design showcasing interior space with carefully selected color palette, warm lighting, and harmonious color scheme"
                   loading="eager"
                   onLoad={() => {
@@ -2828,152 +2856,6 @@ const AppContent = () => {
         
       </section>
 
-      {/* Quote Calculator Modal */}
-      <AnimatePresence>
-        {showQuoteCalculator && (
-          <motion.div
-            className="quote-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowQuoteCalculator(false)}
-          >
-            <motion.div
-              className="quote-content"
-              initial={{ scale: 0.8, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 50 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="quote-header">
-                <h3>Instant Quote Calculator</h3>
-                <button 
-                  className="close-btn"
-                  onClick={() => setShowQuoteCalculator(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="quote-body">
-                <div className="quote-form">
-                  <div className="form-group">
-                    <label htmlFor="quoteService">Service Type</label>
-                    <select 
-                      id="quoteService" 
-                      name="quoteService"
-                      value={quoteData.service}
-                      onChange={(e) => handleQuoteInputChange('service', e.target.value)}
-                    >
-                      <option value="">Select service</option>
-                      <option value="architectural">Architectural Design</option>
-                      <option value="interior">Interior Design</option>
-                      <option value="finishing">Finishing Work</option>
-                      <option value="branding">Branding</option>
-                      <option value="full-service">Full Service</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteArea">Area (sqm)</label>
-                    <input 
-                      type="number" 
-                      id="quoteArea" 
-                      name="quoteArea"
-                      value={quoteData.area}
-                      onChange={(e) => handleQuoteInputChange('area', e.target.value)}
-                      placeholder="Enter area in square meters"
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteComplexity">Project Complexity</label>
-                    <select 
-                      id="quoteComplexity" 
-                      name="quoteComplexity"
-                      value={quoteData.complexity}
-                      onChange={(e) => handleQuoteInputChange('complexity', e.target.value)}
-                    >
-                      <option value="simple">Simple</option>
-                      <option value="medium">Medium</option>
-                      <option value="complex">Complex</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteTimeline">Timeline</label>
-                    <select 
-                      id="quoteTimeline" 
-                      name="quoteTimeline"
-                      value={quoteData.timeline}
-                      onChange={(e) => handleQuoteInputChange('timeline', e.target.value)}
-                    >
-                      <option value="flexible">Flexible (10% discount)</option>
-                      <option value="normal">Normal</option>
-                      <option value="urgent">Urgent (30% premium)</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="quote-result">
-                  <div className="quote-display">
-                    <h4>Estimated Cost</h4>
-                    <div className="quote-amount">
-                      {calculateQuote() > 0 ? (
-                        <>
-                          <span className="amount">{calculateQuote().toLocaleString()}</span>
-                          <span className="currency">ETB</span>
-                        </>
-                      ) : (
-                        <span className="placeholder">Enter details above</span>
-                      )}
-                    </div>
-                    <p className="quote-note">
-                      *This is an estimate. Final pricing may vary based on specific requirements.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="quote-actions">
-                  <motion.button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowQuoteCalculator(false)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Close
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      if (calculateQuote() > 0) {
-                        showBeautifulModal(
-                          'Quote Request Sent!',
-                          '📧 Quote details sent! We will contact you within 24 hours with a detailed proposal.',
-                          'success'
-                        );
-                        setShowQuoteCalculator(false);
-                      } else {
-                        showBeautifulModal(
-                          'Incomplete Information',
-                          'Please fill in all required fields to get a quote.',
-                          'warning'
-                        );
-                      }
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Get Detailed Quote
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Booking Modal */}
       <AnimatePresence>
@@ -3740,6 +3622,13 @@ const AppContent = () => {
         )}
       </AnimatePresence>
 
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title={successModalContent.title}
+        message={successModalContent.message}
+      />
     </div>
   );
 };

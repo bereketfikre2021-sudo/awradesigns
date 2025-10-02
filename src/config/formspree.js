@@ -3,22 +3,22 @@
 
 export const FORMSPREE_ENDPOINTS = {
   // Main contact form
-  CONTACT: 'https://formspree.io/f/YOUR_CONTACT_FORM_ID',
+  CONTACT: 'https://formspree.io/f/mrbykzlb',
   
   // Booking consultation form
-  BOOKING: 'https://formspree.io/f/YOUR_BOOKING_FORM_ID',
+  BOOKING: 'https://formspree.io/f/mrbykzlb',
   
   // Newsletter subscription form
-  NEWSLETTER: 'https://formspree.io/f/YOUR_NEWSLETTER_FORM_ID',
+  NEWSLETTER: 'https://formspree.io/f/mrbykzlb',
   
   // Get started form
-  GET_STARTED: 'https://formspree.io/f/YOUR_GET_STARTED_FORM_ID',
+  GET_STARTED: 'https://formspree.io/f/mrbykzlb',
   
   // Secure form
-  SECURE: 'https://formspree.io/f/YOUR_SECURE_FORM_ID',
+  SECURE: 'https://formspree.io/f/mrbykzlb',
   
   // Quote calculator form
-  QUOTE: 'https://formspree.io/f/YOUR_QUOTE_FORM_ID'
+  QUOTE: 'https://formspree.io/f/mrbykzlb'
 };
 
 // Formspree configuration options
