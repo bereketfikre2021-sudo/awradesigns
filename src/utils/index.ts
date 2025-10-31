@@ -347,15 +347,26 @@ export const validatePhone = (phone: string): boolean => {
  */
 export const getImagePath = (imagePath: string): string => {
   // Get Vite's base URL (usually '/' for root, or '/repo-name/' for GitHub Pages)
-  const baseUrl = import.meta.env.BASE_URL || '/';
+  let baseUrl = import.meta.env.BASE_URL || '/';
   
-  // Ensure imagePath starts with / and remove leading slash from baseUrl if needed
+  // Normalize baseUrl - ensure it doesn't end with / (we'll add it)
+  baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  // Ensure baseUrl starts with / (handle edge cases)
+  if (baseUrl === '' || !baseUrl.startsWith('/')) {
+    baseUrl = '/' + baseUrl;
+  }
+  
+  // Normalize imagePath - ensure it starts with /
   const normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   
-  // Combine base URL with image path, ensuring no double slashes
-  const combined = `${baseUrl}${normalizedImagePath}`.replace(/\/+/g, '/');
+  // Combine: baseUrl + normalizedImagePath
+  // This will always result in a valid path like /images/... or /repo-name/images/...
+  const combined = `${baseUrl}${normalizedImagePath}`;
   
-  return combined;
+  // Remove any double slashes (but preserve the protocol if it's a full URL)
+  const finalPath = combined.replace(/([^:])\/+/g, '$1/');
+  
+  return finalPath;
 };
 
 // Export all utilities as a single object
