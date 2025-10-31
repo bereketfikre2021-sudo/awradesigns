@@ -968,12 +968,12 @@ export default function App() {
         <meta property="og:url" content={`https://awradesigns.com#${currentSection}`} />
         <meta property="og:title" content={getPageMeta(currentSection).title} />
         <meta property="og:description" content={getPageMeta(currentSection).description} />
-        <meta property="og:image" content="https://awradesigns.com/images/Hero BG.webp" />
+        <meta property="og:image" content="https://awradesigns.com/images/Hero%20BG.webp" />
         <meta property="og:image:alt" content="Awra Finishing & Interior - Luxury interior design and professional architecture services in Addis Ababa, Ethiopia" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/webp" />
-        <meta property="og:image:secure_url" content="https://awradesigns.com/images/Hero BG.webp" />
+        <meta property="og:image:secure_url" content="https://awradesigns.com/images/Hero%20BG.webp" />
         <meta property="og:site_name" content="Awra Finishing & Interior" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:locale:alternate" content="am_ET" />
@@ -985,7 +985,7 @@ export default function App() {
         <meta name="twitter:url" content={`https://awradesigns.com#${currentSection}`} />
         <meta name="twitter:title" content={getPageMeta(currentSection).title} />
         <meta name="twitter:description" content={getPageMeta(currentSection).description} />
-        <meta name="twitter:image" content="https://awradesigns.com/images/Hero BG.webp" />
+        <meta name="twitter:image" content="https://awradesigns.com/images/Hero%20BG.webp" />
         <meta name="twitter:image:alt" content="Awra Finishing & Interior - Luxury interior design and professional architecture services in Addis Ababa, Ethiopia" />
         <meta name="twitter:creator" content="@awradesigns" />
         <meta name="twitter:site" content="@awradesigns" />

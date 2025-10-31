@@ -353,7 +353,18 @@ export const getImagePath = (imagePath: string): string => {
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   
   // Ensure imagePath starts with /
-  const normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  let normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  // URL encode the path to handle spaces and special characters (but keep slashes)
+  // Split by slashes, encode each part, then rejoin
+  const pathParts = normalizedImagePath.split('/');
+  const encodedParts = pathParts.map((part, index) => {
+    // Don't encode empty parts (slashes at start/end)
+    if (part === '') return part;
+    // Encode spaces and special characters in filenames
+    return encodeURIComponent(part);
+  });
+  normalizedImagePath = encodedParts.join('/');
   
   // Combine base URL with image path, ensuring proper formatting
   const combined = `${normalizedBase}${normalizedImagePath}`;
