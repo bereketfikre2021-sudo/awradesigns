@@ -2,6 +2,8 @@
   publish = "dist"
   command = "npm run build"
 
+# SPA fallback - redirect all non-file requests to index.html
+# Netlify automatically serves existing files, so this only catches routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
