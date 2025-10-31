@@ -13,8 +13,8 @@ const ThemeAwareLogo = ({
   // Determine which logo to use based on theme
   const getLogoSrc = () => {
     if (!isLoaded) {
-      // Return a placeholder or default logo while theme is loading
-      return getImagePath('/images/LOGO.webp');
+      // Return default logo while theme is loading (use light as default)
+      return getImagePath('/images/LOGO-light.webp');
     }
     
     return theme === 'dark' 

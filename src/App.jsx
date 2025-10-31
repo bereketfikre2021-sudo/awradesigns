@@ -1091,7 +1091,7 @@ export default function App() {
             "name": "Awra Finishing & Interior",
             "alternateName": "Awra Designs",
             "url": "https://awradesigns.com",
-            "logo": "https://awradesigns.com/images/LOGO.webp",
+            "logo": "https://awradesigns.com/images/LOGO-light.webp",
             "description": "Professional architectural design, interior planning, finishing work, and branding services in Addis Ababa, Ethiopia",
             "foundingDate": "2019",
             "numberOfEmployees": "5-10",

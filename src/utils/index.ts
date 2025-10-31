@@ -349,11 +349,14 @@ export const getImagePath = (imagePath: string): string => {
   // Get Vite's base URL (usually '/' for root, or '/repo-name/' for GitHub Pages)
   const baseUrl = import.meta.env.BASE_URL || '/';
   
-  // Ensure imagePath starts with / and remove leading slash from baseUrl if needed
+  // Remove leading slash from baseUrl if it exists, then add it back
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  // Ensure imagePath starts with /
   const normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   
-  // Combine base URL with image path, ensuring no double slashes
-  const combined = `${baseUrl}${normalizedImagePath}`.replace(/\/+/g, '/');
+  // Combine base URL with image path, ensuring proper formatting
+  const combined = `${normalizedBase}${normalizedImagePath}`;
   
   return combined;
 };
