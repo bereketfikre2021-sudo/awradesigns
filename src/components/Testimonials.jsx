@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimatedInView } from '../hooks';
+import { getImagePath } from '../utils';
 
 const Testimonials = () => {
   const { ref, inView } = useAnimatedInView(0.2);
 
   // Sample testimonials data - Replace with real testimonials
-  const [testimonials] = useState([
+  const [testimonials] = useState(useMemo(() => [
     {
       id: 1,
       name: 'Alemayehu Tekle',
@@ -73,7 +74,10 @@ const Testimonials = () => {
       text: 'From concept to completion, Awra Designs exceeded all expectations. They understood our vision and brought it to life beautifully. The quality and attention to detail is remarkable.',
       date: '2024'
     }
-  ]);
+  ].map(testimonial => ({
+    ...testimonial,
+    image: testimonial.image ? getImagePath(testimonial.image) : getImagePath('/images/default-avatar.jpg')
+  })), []));
 
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [filter, setFilter] = useState('All');
@@ -155,10 +159,10 @@ const Testimonials = () => {
               <div className="testimonial-header">
                 <div className="testimonial-image">
                   <img 
-                    src={testimonial.image || '/images/default-avatar.jpg'} 
+                    src={testimonial.image || getImagePath('/images/default-avatar.jpg')} 
                     alt={testimonial.name}
                     onError={(e) => {
-                      e.target.src = '/images/default-avatar.jpg';
+                      e.target.src = getImagePath('/images/default-avatar.jpg');
                     }}
                   />
                 </div>

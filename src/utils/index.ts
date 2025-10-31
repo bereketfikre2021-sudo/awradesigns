@@ -338,6 +338,26 @@ export const validatePhone = (phone: string): boolean => {
   return phoneRegex.test(phone.replace(/\s/g, ''));
 };
 
+// Image Path Utilities for GitHub Pages compatibility
+/**
+ * Get the correct image path that works with Vite's base URL
+ * This ensures images work correctly when deployed to GitHub Pages or other subdirectory setups
+ * @param imagePath - Path relative to public folder (e.g., '/images/hero.webp' or 'images/hero.webp')
+ * @returns Full path with base URL prepended
+ */
+export const getImagePath = (imagePath: string): string => {
+  // Get Vite's base URL (usually '/' for root, or '/repo-name/' for GitHub Pages)
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  
+  // Ensure imagePath starts with / and remove leading slash from baseUrl if needed
+  const normalizedImagePath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  // Combine base URL with image path, ensuring no double slashes
+  const combined = `${baseUrl}${normalizedImagePath}`.replace(/\/+/g, '/');
+  
+  return combined;
+};
+
 // Export all utilities as a single object
 export const utils = {
   debounce,
@@ -378,4 +398,5 @@ export const utils = {
   sanitizeInput,
   validateEmail,
   validatePhone,
+  getImagePath,
 };

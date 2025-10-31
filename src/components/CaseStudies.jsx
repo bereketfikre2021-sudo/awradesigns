@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnimatedInView } from '../hooks';
+import { getImagePath } from '../utils';
 import LazyImage from './LazyImage';
 
 const CaseStudies = () => {
@@ -9,7 +10,7 @@ const CaseStudies = () => {
   const [activeFilter, setActiveFilter] = useState('All');
 
   // Sample case studies - Replace with real case studies
-  const caseStudies = [
+  const caseStudies = useMemo(() => [
     {
       id: 1,
       title: 'Modern Residential Villa',
@@ -118,7 +119,10 @@ const CaseStudies = () => {
       ],
       featured: false
     }
-  ];
+  ].map(caseStudy => ({
+    ...caseStudy,
+    images: caseStudy.images.map(img => getImagePath(img))
+  })), []);
 
   const filters = ['All', 'Residential', 'Commercial'];
 
@@ -304,6 +308,7 @@ const CaseStudies = () => {
 };
 
 export default CaseStudies;
+
 
 
 

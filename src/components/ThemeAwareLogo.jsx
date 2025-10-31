@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { motion } from 'framer-motion';
+import { getImagePath } from '../utils';
 
 const ThemeAwareLogo = ({ 
   className = '', 
@@ -13,12 +14,12 @@ const ThemeAwareLogo = ({
   const getLogoSrc = () => {
     if (!isLoaded) {
       // Return a placeholder or default logo while theme is loading
-      return '/images/LOGO.webp';
+      return getImagePath('/images/LOGO.webp');
     }
     
     return theme === 'dark' 
-      ? '/images/LOGO-dark.webp' 
-      : '/images/LOGO-light.webp';
+      ? getImagePath('/images/LOGO-dark.webp')
+      : getImagePath('/images/LOGO-light.webp');
   };
 
   return (

@@ -120,6 +120,10 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   },
-  base: '/',
-  publicDir: 'public'
+  base: process.env.VITE_BASE_URL || '/',
+  publicDir: 'public',
+  define: {
+    // Ensure BASE_URL is available in client code
+    'import.meta.env.BASE_URL': JSON.stringify(process.env.VITE_BASE_URL || '/')
+  }
 })

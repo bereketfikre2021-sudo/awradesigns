@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getImagePath } from '../utils';
 
 const ARViewer = ({ onClose, showModal }) => {
   const [isARActive, setIsARActive] = useState(false);
@@ -12,7 +13,7 @@ const ARViewer = ({ onClose, showModal }) => {
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
 
-  const furnitureItems = [
+  const furnitureItems = useMemo(() => [
     { 
       id: 1, 
       name: 'Modern Sofa', 
@@ -61,7 +62,10 @@ const ARViewer = ({ onClose, showModal }) => {
       color: '#8B4513',
       dimensions: '70cm x 70cm x 90cm'
     },
-  ];
+  ].map(item => ({
+    ...item,
+    image: getImagePath(item.image)
+  })), []);
 
   useEffect(() => {
     if (isARActive) {

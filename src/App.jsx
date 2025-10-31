@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSpring, animated } from 'react-spring';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useDevice, usePerformance, useAnimatedInView, useLazyLoading, useLazyImage, useSEO, usePerformanceMonitoring } from './hooks';
-import { utils } from './utils';
+import { utils, getImagePath } from './utils';
 import LazyImage from './components/LazyImage';
 import LazySection from './components/LazySection';
 import { ThemeToggle, useTheme } from './contexts/ThemeContext.jsx';
@@ -210,7 +210,7 @@ export default function App() {
     img.onload = () => {
       setHeroImageLoaded(true);
     };
-    img.src = '/images/Hero BG.webp';
+    img.src = getImagePath('/images/Hero BG.webp');
   }, []);
 
   // Lazy loading function for images
@@ -708,7 +708,7 @@ export default function App() {
     },
   ];
 
-  const projects = [
+  const projects = useMemo(() => [
     {
       id: 1,
       title: "Modern Living Space",
@@ -775,10 +775,13 @@ export default function App() {
       rating: 4.9,
       isFeatured: true,
     }
-  ];
+  ].map(project => ({
+    ...project,
+    image: getImagePath(project.image)
+  })), []);
 
   // Blog posts data
-  const blogPosts = [
+  const blogPosts = useMemo(() => [
     {
       id: 1,
       title: "Top 10 Interior Design Trends for 2025",
@@ -812,7 +815,10 @@ export default function App() {
       tags: ["Colors", "Psychology", "Wellness"],
       fullContent: "Colors have a profound psychological impact on our mood, productivity, and overall well-being. Understanding color psychology can help you create spaces that support your goals. Blue promotes calmness and concentration, making it ideal for bedrooms and offices. Green connects us with nature and promotes balance and harmony. Warm colors like red and orange stimulate energy and creativity but should be used sparingly. Yellow enhances optimism and mental clarity. Neutral colors provide flexibility and timeless appeal. The key is to balance colors according to room function and desired atmosphere. Consider natural lighting and room size when selecting color palettes. Accent colors can add personality without overwhelming the space."
     }
-  ];
+  ].map(post => ({
+    ...post,
+    image: getImagePath(post.image)
+  })), []);
 
   // Services data
   const services = [
@@ -1379,7 +1385,7 @@ export default function App() {
               >
                 <div className="image-card-overlay"></div>
                 <LazyImage
-                  src="/images/Hero BG.webp"
+                  src={getImagePath("/images/Hero BG.webp")}
                   alt="Luxury interior design showcase featuring modern living space with elegant furniture, premium finishes, and sophisticated lighting - Awra Finishing & Interior design services"
                   className="hero-featured-image"
                   onLoad={() => setHeroImageLoaded(true)}
@@ -2316,7 +2322,7 @@ export default function App() {
               <div className="member-image-wrapper">
                 <div className="member-avatar">
                   <LazyImage
-                    src="/images/Tesfahun Tsegaye.webp"
+                    src={getImagePath("/images/Tesfahun Tsegaye.webp")}
                     alt="Tesfahun Tsegaye"
                     className=""
                     placeholder="Loading..."
@@ -2345,7 +2351,7 @@ export default function App() {
               <div className="member-image-wrapper">
                 <div className="member-avatar">
                   <LazyImage
-                    src="/images/Sarah Bekele.webp"
+                    src={getImagePath("/images/Sarah Bekele.webp")}
                     alt="Sarah Bekele"
                     className=""
                     placeholder="Loading..."
@@ -2374,7 +2380,7 @@ export default function App() {
               <div className="member-image-wrapper">
                 <div className="member-avatar">
                   <LazyImage
-                    src="/images/Daniel Haile.webp"
+                    src={getImagePath("/images/Daniel Haile.webp")}
                     alt="Daniel Haile"
                     className=""
                     placeholder="Loading..."
@@ -2403,7 +2409,7 @@ export default function App() {
               <div className="member-image-wrapper">
                 <div className="member-avatar">
                   <LazyImage
-                    src="/images/Bereket Fikre.webp"
+                    src={getImagePath("/images/Bereket Fikre.webp")}
                     alt="Bereket Fikre"
                     className=""
                     placeholder="Loading..."
