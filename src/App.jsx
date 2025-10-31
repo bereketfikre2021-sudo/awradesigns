@@ -89,7 +89,7 @@ export default function App() {
     currentMeta.title,
     currentMeta.description,
     "architectural design Ethiopia, interior design Addis Ababa, finishing work, branding services, 3D visualization, AR design, construction Ethiopia, home renovation, office design, commercial design",
-    getImagePath("/images/Hero BG.webp")
+    "/images/Hero BG.webp"
   );
   
   const performanceMetrics = usePerformanceMonitoring();

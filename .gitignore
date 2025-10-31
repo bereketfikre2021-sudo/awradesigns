@@ -113,3 +113,26 @@ temp/
 # Deployment
 .vercel
 .netlify
+
+# Windows system files
+AppData/
+Contacts/
+Desktop/
+Documents/
+Downloads/
+Favorites/
+IntelGraphicsProfiles/
+Links/
+Music/
+NTUSER.DAT*
+ntuser.dat.*
+ntuser.ini
+OneDrive/
+Pictures/
+Saved Games/
+Searches/
+Videos/
+.cursor/
+.lesshst
+.node_repl_history
+.cache/
