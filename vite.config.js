@@ -2,11 +2,24 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import fs from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    // Copy _redirects file to dist for Netlify
+    {
+      name: 'copy-redirects',
+      closeBundle() {
+        const redirectsPath = path.resolve(__dirname, '_redirects')
+        const distPath = path.resolve(__dirname, 'dist', '_redirects')
+        if (fs.existsSync(redirectsPath)) {
+          fs.copyFileSync(redirectsPath, distPath)
+          console.log('✓ Copied _redirects to dist')
+        }
+      }
+    },
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'images/*.webp', 'images/LOGO-dark.webp', 'images/LOGO-light.webp', 'images/Tesfahun Tsegaye.webp', 'images/Sarah Bekele.webp', 'images/Daniel Haile.webp', 'images/Bereket Fikre.webp'],
