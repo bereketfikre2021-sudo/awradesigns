@@ -8,7 +8,11 @@ import LazyImage from './components/LazyImage';
 import LazySection from './components/LazySection';
 import { ThemeToggle, useTheme } from './contexts/ThemeContext.jsx';
 import { HoverGlow, RippleButton, ScrollAnimation } from './components/MicroInteractions.jsx';
+import ThemeAwareLogo from './components/ThemeAwareLogo';
+import ScrollProgress from './components/ScrollProgress';
+import CountUp from './components/CountUp';
 import WhyChooseUsLight from './components/WhyChooseUsLight.jsx';
+import { GA_MEASUREMENT_ID, FB_PIXEL_ID, ANALYTICS_ENABLED } from './config/analytics';
 import './App.css';
 import './styles/WhyChooseUsLight.css';
 
@@ -62,25 +66,22 @@ export default function App() {
   };
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [selectedBlogPost, setSelectedBlogPost] = useState(null);
+  const [showBlogModal, setShowBlogModal] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [showServiceModal, setShowServiceModal] = useState(false);
   const [showGetStarted, setShowGetStarted] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [showQuoteCalculator, setShowQuoteCalculator] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-  const [quoteData, setQuoteData] = useState({
-    service: '',
-    area: '',
-    complexity: 'medium',
-    timeline: 'normal'
-  });
   
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const [loadedImages, setLoadedImages] = useState(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showContactDropdown, setShowContactDropdown] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // SEO and Performance monitoring
   const currentMeta = getPageMeta(currentSection);
@@ -88,7 +89,7 @@ export default function App() {
     currentMeta.title,
     currentMeta.description,
     "architectural design Ethiopia, interior design Addis Ababa, finishing work, branding services, 3D visualization, AR design, construction Ethiopia, home renovation, office design, commercial design",
-    "/images/hero-image.webp"
+    "/images/Hero BG.webp"
   );
   
   const performanceMetrics = usePerformanceMonitoring();
@@ -107,35 +108,16 @@ export default function App() {
     };
   }, [showContactDropdown]);
 
-  // Mobile menu toggle function
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  // Close mobile menu when clicking outside or on link
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
-  // Handle body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.classList.add('mobile-menu-open');
-    } else {
-      document.body.classList.remove('mobile-menu-open');
-    }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove('mobile-menu-open');
-    };
-  }, [isMobileMenuOpen]);
 
   // Form states
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
+    phone: '',
     projectType: '',
+    budget: '',
+    timeline: '',
+    hearAboutUs: '',
     message: ''
   });
   
@@ -228,7 +210,7 @@ export default function App() {
     img.onload = () => {
       setHeroImageLoaded(true);
     };
-    img.src = '/images/hero-image.webp';
+    img.src = '/images/Hero BG.webp';
   }, []);
 
   // Lazy loading function for images
@@ -254,44 +236,92 @@ export default function App() {
     setActiveFilter(filter);
   };
 
-  // Quote Calculator
-  const calculateQuote = () => {
-    const basePrices = {
-      'architectural': 150,
-      'interior': 100,
-      'finishing': 80,
-      'branding': 60,
-      'full-service': 200
-    };
-
-    const complexityMultipliers = {
-      'simple': 0.8,
-      'medium': 1.0,
-      'complex': 1.5
-    };
-
-    const timelineMultipliers = {
-      'urgent': 1.3,
-      'normal': 1.0,
-      'flexible': 0.9
-    };
-
-    if (!quoteData.service || !quoteData.area) return 0;
-
-    const basePrice = basePrices[quoteData.service] || 100;
-    const area = parseFloat(quoteData.area) || 0;
-    const complexity = complexityMultipliers[quoteData.complexity] || 1.0;
-    const timeline = timelineMultipliers[quoteData.timeline] || 1.0;
-
-    return Math.round(basePrice * area * complexity * timeline);
+  // Handle project modal
+  const handleProjectClick = (project) => {
+    setSelectedProject(project);
+    setShowProjectModal(true);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
   };
 
-  const handleQuoteInputChange = (field, value) => {
-    setQuoteData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleCloseProjectModal = () => {
+    setShowProjectModal(false);
+    setSelectedProject(null);
+    document.body.style.overflow = '';
   };
+
+  // Handle blog modal
+  const handleBlogClick = (blogPost) => {
+    setSelectedBlogPost(blogPost);
+    setShowBlogModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCloseBlogModal = () => {
+    setShowBlogModal(false);
+    setSelectedBlogPost(null);
+    document.body.style.overflow = '';
+  };
+
+  // Handle service modal
+  const handleServiceClick = (service) => {
+    setSelectedService(service);
+    setShowServiceModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCloseServiceModal = () => {
+    setShowServiceModal(false);
+    setSelectedService(null);
+    document.body.style.overflow = '';
+  };
+
+  // Handle booking modal
+  const handleBookingClick = () => {
+    setShowBookingModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCloseBookingModal = () => {
+    setShowBookingModal(false);
+    document.body.style.overflow = '';
+  };
+
+  // ESC key handler for modals
+  useEffect(() => {
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape') {
+        if (showProjectModal) {
+          handleCloseProjectModal();
+        }
+        if (showBlogModal) {
+          handleCloseBlogModal();
+        }
+        if (showServiceModal) {
+          handleCloseServiceModal();
+        }
+        if (showBookingModal) {
+          handleCloseBookingModal();
+        }
+        if (showPrivacyModal) {
+          setShowPrivacyModal(false);
+          document.body.style.overflow = '';
+        }
+        if (showTermsModal) {
+          setShowTermsModal(false);
+          document.body.style.overflow = '';
+        }
+      }
+    };
+
+    if (showProjectModal || showBlogModal || showServiceModal || showBookingModal || showPrivacyModal || showTermsModal) {
+      document.addEventListener('keydown', handleEscKey);
+      return () => {
+        document.removeEventListener('keydown', handleEscKey);
+      };
+    }
+  }, [showProjectModal, showBlogModal, showServiceModal, showBookingModal, showPrivacyModal, showTermsModal]);
+
 
   // Form input handlers
   const handleContactFormChange = (field, value) => {
@@ -322,46 +352,165 @@ export default function App() {
     }));
   };
 
+  // Form validation helper
+  const validateContactForm = () => {
+    const { name, email, phone, projectType, budget, timeline, message } = contactForm;
+    
+    if (!name.trim()) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please enter your name.' }
+      }));
+      return false;
+    }
+    
+    if (!email.trim()) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please enter your email address.' }
+      }));
+      return false;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please enter a valid email address.' }
+      }));
+      return false;
+    }
+    
+    // Phone validation (optional but if provided, should be valid)
+    if (phone.trim() && phone.trim().length < 10) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please enter a valid phone number.' }
+      }));
+      return false;
+    }
+    
+    if (!projectType) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please select a project type.' }
+      }));
+      return false;
+    }
+    
+    if (!message.trim()) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please enter your message.' }
+      }));
+      return false;
+    }
+    
+    if (message.trim().length < 10) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        contact: { status: 'error', message: 'Please provide more details in your message (at least 10 characters).' }
+      }));
+      return false;
+    }
+    
+    return true;
+  };
+
   // Form submission handlers
   const handleContactFormSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateContactForm()) {
+      return;
+    }
+    
     setFormSubmissions(prev => ({
       ...prev,
       contact: { status: 'loading', message: 'Sending message...' }
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Submit to Formspree API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      // In a real app, you would send the data to your backend
-      // Form submitted successfully
-      
-      setFormSubmissions(prev => ({
-        ...prev,
-        contact: { status: 'success', message: 'Thank you! We\'ll get back to you within 24 hours.' }
-      }));
-      
-      // Reset form
-      setContactForm({
-        name: '',
-        email: '',
-        projectType: '',
-        message: ''
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactForm.name.trim(),
+          email: contactForm.email.trim(),
+          phone: contactForm.phone.trim(),
+          projectType: contactForm.projectType,
+          budget: contactForm.budget,
+          timeline: contactForm.timeline,
+          hearAboutUs: contactForm.hearAboutUs,
+          message: contactForm.message.trim(),
+          _subject: `New Contact Form Submission from ${contactForm.name.trim()}`,
+          _replyto: contactForm.email.trim(),
+          _cc: contactForm.email.trim()
+        }),
+        signal: controller.signal
       });
-      
-      // Clear success message after 5 seconds
-      setTimeout(() => {
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
         setFormSubmissions(prev => ({
           ...prev,
-          contact: { status: 'idle', message: '' }
+          contact: { status: 'success', message: 'Thank you! We\'ll get back to you within 24 hours.' }
         }));
-      }, 5000);
+        
+        // Reset form
+        setContactForm({
+          name: '',
+          email: '',
+          phone: '',
+          projectType: '',
+          budget: '',
+          timeline: '',
+          hearAboutUs: '',
+          message: ''
+        });
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setFormSubmissions(prev => ({
+            ...prev,
+            contact: { status: 'idle', message: '' }
+          }));
+        }, 5000);
+        
+        // Track successful form submission
+        if (ANALYTICS_ENABLED && typeof window !== 'undefined' && window.gtag) {
+          window.gtag('event', 'form_submission', {
+            form_name: 'contact',
+            form_location: 'contact_section'
+          });
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Form submission failed');
+      }
       
     } catch (error) {
+      console.error('Form submission error:', error);
+      
+      let errorMessage = 'Sorry, there was an error. Please try again or contact us directly.';
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please check your connection and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       setFormSubmissions(prev => ({
         ...prev,
-        contact: { status: 'error', message: 'Sorry, there was an error. Please try again or contact us directly.' }
+        contact: { status: 'error', message: errorMessage }
       }));
     }
   };
@@ -397,7 +546,7 @@ export default function App() {
       
       // Close modal after success
       setTimeout(() => {
-        setShowBookingModal(false);
+        handleCloseBookingModal();
         setFormSubmissions(prev => ({
           ...prev,
           booking: { status: 'idle', message: '' }
@@ -414,17 +563,36 @@ export default function App() {
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate email
+    if (!newsletterForm.email || !newsletterForm.email.includes('@')) {
+      setFormSubmissions(prev => ({
+        ...prev,
+        newsletter: { status: 'error', message: 'Please enter a valid email address.' }
+      }));
+      return;
+    }
+
     setFormSubmissions(prev => ({
       ...prev,
       newsletter: { status: 'loading', message: 'Subscribing...' }
     }));
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Newsletter subscription successful
-      
+      const response = await fetch('https://formspree.io/f/mrbykzlb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newsletterForm.email,
+          subject: 'Newsletter Subscription',
+          message: `Newsletter subscription request from: ${newsletterForm.email}`,
+          _formname: 'newsletter'
+        })
+      });
+
+      if (response.ok) {
       setFormSubmissions(prev => ({
         ...prev,
         newsletter: { status: 'success', message: 'Successfully subscribed! Check your email for confirmation.' }
@@ -440,6 +608,9 @@ export default function App() {
           newsletter: { status: 'idle', message: '' }
         }));
       }, 4000);
+      } else {
+        throw new Error('Subscription failed');
+      }
       
     } catch (error) {
       setFormSubmissions(prev => ({
@@ -543,7 +714,7 @@ export default function App() {
       title: "Modern Living Space",
       category: "Interior Design",
       description: "A contemporary living room featuring minimalist design with smart home integration",
-      image: "/images/work-samples-1.webp",
+      image: "/images/LIVING_11 - Photo copy.webp",
       tags: ["3D", "Modern", "Visualization"],
       year: 2024,
       rating: 5,
@@ -554,7 +725,7 @@ export default function App() {
       title: "Luxury Bedroom Suite",
       category: "Interior Design",
       description: "Elegant master bedroom with custom furniture and premium finishes",
-      image: "/images/work-samples-2.webp",
+      image: "/images/Bed Rm_11 - Photo copy.webp",
       tags: ["Luxury", "Premium", "Finishing"],
       year: 2024,
       rating: 5,
@@ -565,7 +736,7 @@ export default function App() {
       title: "Contemporary Kitchen",
       category: "Interior Design",
       description: "State-of-the-art kitchen with smart appliances and ergonomic design",
-      image: "/images/work-samples-3.webp",
+      image: "/images/CH Bed 1_1 - Photo copy.webp",
       tags: ["Kitchen", "Smart Appliances", "Ergonomic"],
       year: 2023,
       rating: 5,
@@ -576,7 +747,7 @@ export default function App() {
       title: "Executive Office",
       category: "Interior Design",
       description: "Professional workspace designed for productivity and comfort",
-      image: "/images/work-samples-4.webp",
+      image: "/images/LOBBY_26 - Photo copy.webp",
       tags: ["Office", "Productivity", "Professional"],
       year: 2023,
       rating: 5,
@@ -587,7 +758,7 @@ export default function App() {
       title: "Outdoor Living Space",
       category: "Exterior Design",
       description: "Beautiful outdoor area with modern furniture and landscape design",
-      image: "/images/work-samples-7.webp",
+      image: "/images/3D_1 - Photo copy.webp",
       tags: ["3D", "Visualization", "Modern"],
       year: 2023,
       rating: 5,
@@ -598,11 +769,116 @@ export default function App() {
       title: "Corporate Brand Identity",
       category: "Branding",
       description: "Complete brand identity design including logo, color palette, and visual guidelines for a tech startup",
-      image: "/images/work-samples-8.webp",
+      image: "/images/3D_2 - Photo copy.webp",
       tags: ["Branding", "Identity", "Logo"],
       year: 2024,
       rating: 4.9,
       isFeatured: true,
+    }
+  ];
+
+  // Blog posts data
+  const blogPosts = [
+    {
+      id: 1,
+      title: "Top 10 Interior Design Trends for 2025",
+      category: "Interior Design",
+      date: "Dec 15, 2024",
+      readTime: "5 min read",
+      image: "/images/Gym_11 - Photo copy.webp",
+      description: "Discover the latest interior design trends that will dominate 2025, from sustainable materials to smart home integration.",
+      tags: ["Trends", "2025", "Modern"],
+      fullContent: "The world of interior design is constantly evolving, and 2025 brings exciting new trends that blend sustainability with modern aesthetics. This year, we're seeing a strong emphasis on biophilic design, incorporating natural elements and plants into living spaces. Smart home integration continues to grow, with seamless technology becoming an integral part of modern homes. Sustainable materials like bamboo, reclaimed wood, and recycled metals are gaining popularity. Minimalist designs with bold accent pieces create stunning contrasts. Warm, earthy color palettes combined with statement lighting fixtures are defining the contemporary look. Multi-functional furniture is becoming essential for urban living spaces."
+    },
+    {
+      id: 2,
+      title: "Complete Guide to Architectural Planning in Ethiopia",
+      category: "Architecture",
+      date: "Dec 10, 2024",
+      readTime: "8 min read",
+      image: "/images/3D_3 - Photo copy.webp",
+      description: "Everything you need to know about architectural planning, permits, and regulations in Ethiopia for your next project.",
+      tags: ["Planning", "Ethiopia", "Permits"],
+      fullContent: "Architectural planning in Ethiopia requires a thorough understanding of local regulations and building codes. The process begins with site assessment and feasibility studies. You'll need to obtain building permits from the relevant municipal authorities. Zoning regulations vary by location, so it's crucial to check local requirements. Structural design must comply with Ethiopian building standards. Environmental impact assessments may be required for larger projects. Working with certified local architects and engineers is essential. The approval process typically takes 30-90 days depending on project complexity. Understanding these requirements upfront will save time and ensure smooth project execution."
+    },
+    {
+      id: 3,
+      title: "Color Psychology: How Colors Affect Your Space",
+      category: "Design Tips",
+      date: "Dec 5, 2024",
+      readTime: "6 min read",
+      image: "/images/Master Bath_11 - Photo copy.webp",
+      description: "Learn how different colors can influence mood, productivity, and well-being in your home and office spaces.",
+      tags: ["Colors", "Psychology", "Wellness"],
+      fullContent: "Colors have a profound psychological impact on our mood, productivity, and overall well-being. Understanding color psychology can help you create spaces that support your goals. Blue promotes calmness and concentration, making it ideal for bedrooms and offices. Green connects us with nature and promotes balance and harmony. Warm colors like red and orange stimulate energy and creativity but should be used sparingly. Yellow enhances optimism and mental clarity. Neutral colors provide flexibility and timeless appeal. The key is to balance colors according to room function and desired atmosphere. Consider natural lighting and room size when selecting color palettes. Accent colors can add personality without overwhelming the space."
+    }
+  ];
+
+  // Services data
+  const services = [
+    {
+      id: 1,
+      icon: '🏗️',
+      title: 'Architectural Design',
+      description: 'Complete building design from concept to construction drawings. We handle structural planning, space optimization, and regulatory compliance.',
+      features: [
+        'Building design & planning',
+        'Structural engineering',
+        'Regulatory compliance',
+        '3D visualization',
+        'Construction drawings'
+      ],
+      price: 'From 80,000 ETB',
+      duration: '2-4 months',
+      badge: 'Most Popular'
+    },
+    {
+      id: 2,
+      icon: '🎨',
+      title: 'Interior Design',
+      description: 'Transform your spaces with functional layouts, material selection, lighting design, and furniture planning for optimal living and working environments.',
+      features: [
+        'Space planning & layout',
+        'Color scheme design',
+        'Furniture selection',
+        'Lighting design',
+        'Material sourcing'
+      ],
+      price: 'From 50,000 ETB',
+      duration: '2-6 weeks',
+      badge: null
+    },
+    {
+      id: 3,
+      icon: '🛠️',
+      title: 'Finishing Work',
+      description: 'Premium construction finishing including flooring, painting, tiling, carpentry, and detailed craftsmanship to bring designs to life.',
+      features: [
+        'Flooring installation',
+        'Painting & wall finishes',
+        'Tiling & stone work',
+        'Custom carpentry',
+        'Quality assurance'
+      ],
+      price: 'From 30,000 ETB',
+      duration: '1-3 weeks',
+      badge: null
+    },
+    {
+      id: 4,
+      icon: '🎯',
+      title: 'Brand Identity',
+      description: 'Create distinctive brand identities, logos, and visual communication systems for businesses, including signage and environmental graphics.',
+      features: [
+        'Logo design',
+        'Brand guidelines',
+        'Business cards & stationery',
+        'Signage design',
+        'Marketing materials'
+      ],
+      price: 'From 25,000 ETB',
+      duration: '1-2 weeks',
+      badge: null
     }
   ];
 
@@ -638,7 +914,7 @@ export default function App() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           >
-            <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" />
+            <ThemeAwareLogo />
           </motion.div>
           <motion.h2
             initial={{ opacity: 0 }}
@@ -662,6 +938,11 @@ export default function App() {
 
   return (
     <div className="App">
+      {/* Skip Navigation Link for Accessibility */}
+      <a href="#main-content" className="skip-link" aria-label="Skip to main content">
+        Skip to main content
+      </a>
+      
       <Helmet>
         <title>{getPageMeta(currentSection).title}</title>
         <meta name="description" content={getPageMeta(currentSection).description} />
@@ -681,24 +962,34 @@ export default function App() {
         <meta property="og:url" content={`https://awradesigns.com#${currentSection}`} />
         <meta property="og:title" content={getPageMeta(currentSection).title} />
         <meta property="og:description" content={getPageMeta(currentSection).description} />
-        <meta property="og:image" content="/images/hero-image.webp" />
-        <meta property="og:image:alt" content="Awra Finishing & Interior - Professional Architecture & Design Services" />
+        <meta property="og:image" content="https://awradesigns.com/images/Hero BG.webp" />
+        <meta property="og:image:alt" content="Awra Finishing & Interior - Luxury interior design and professional architecture services in Addis Ababa, Ethiopia" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/webp" />
+        <meta property="og:image:secure_url" content="https://awradesigns.com/images/Hero BG.webp" />
         <meta property="og:site_name" content="Awra Finishing & Interior" />
         <meta property="og:locale" content="en_US" />
+        <meta property="og:locale:alternate" content="am_ET" />
         <meta property="article:author" content="Awra Finishing & Interior" />
-        <meta property="article:publisher" content="https://awradesigns.com" />
+        <meta property="article:publisher" content="https://www.facebook.com/awradesigns" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={`https://awradesigns.com#${currentSection}`} />
         <meta name="twitter:title" content={getPageMeta(currentSection).title} />
         <meta name="twitter:description" content={getPageMeta(currentSection).description} />
-        <meta name="twitter:image" content="/images/hero-image.webp" />
-        <meta name="twitter:image:alt" content="Awra Finishing & Interior - Professional Architecture & Design Services" />
+        <meta name="twitter:image" content="https://awradesigns.com/images/Hero BG.webp" />
+        <meta name="twitter:image:alt" content="Awra Finishing & Interior - Luxury interior design and professional architecture services in Addis Ababa, Ethiopia" />
         <meta name="twitter:creator" content="@awradesigns" />
         <meta name="twitter:site" content="@awradesigns" />
+        
+        {/* Additional Social Sharing */}
+        <meta property="article:section" content="Architecture & Design" />
+        <meta property="article:tag" content="Architecture" />
+        <meta property="article:tag" content="Interior Design" />
+        <meta property="article:tag" content="Ethiopia" />
+        <meta property="article:tag" content="Addis Ababa" />
         
         {/* Local Business Schema */}
         <script type="application/ld+json">
@@ -823,18 +1114,24 @@ export default function App() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         
-        {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+        {/* Google Analytics 4 */}
+        {ANALYTICS_ENABLED && GA_MEASUREMENT_ID !== 'GA_MEASUREMENT_ID' && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
         <script>
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'GA_MEASUREMENT_ID');
+                gtag('config', '${GA_MEASUREMENT_ID}');
           `}
         </script>
+          </>
+        )}
         
         {/* Facebook Pixel - Only load if not blocked */}
+        {ANALYTICS_ENABLED && FB_PIXEL_ID !== 'YOUR_PIXEL_ID' && (
+          <>
         <script>
           {`
             try {
@@ -847,7 +1144,7 @@ export default function App() {
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', 'YOUR_PIXEL_ID');
+                  fbq('init', '${FB_PIXEL_ID}');
               fbq('track', 'PageView');
             } catch(e) {
               console.warn('Facebook Pixel initialization failed:', e);
@@ -855,8 +1152,10 @@ export default function App() {
           `}
         </script>
         <noscript>
-          {`<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1" />`}
+              <img height="1" width="1" style={{display:'none'}} src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`} />
         </noscript>
+          </>
+        )}
         
       </Helmet>
 
@@ -868,17 +1167,17 @@ export default function App() {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="nav-container" id="navigation" role="navigation" aria-label="Main navigation">
-          <motion.div 
+          <motion.a 
+            href="#home"
             className="logo"
+            onClick={() => setCurrentSection('home')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-          <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" className="logo-img" />
+          <ThemeAwareLogo className="logo-img" />
+          </motion.a>
           
-          
-          </motion.div>
-          
-          <nav className="nav-links">
+          <nav className="nav-links" role="navigation" aria-label="Main navigation">
             {['home', 'about', 'services', 'works', 'pricing', 'contact'].map((section) => (
               <motion.a
                 key={section}
@@ -886,9 +1185,10 @@ export default function App() {
                 className={currentSection === section ? 'active' : ''}
                 whileHover={{ y: -2 }}
                 whileTap={{ y: 0 }}
+                aria-label={`Navigate to ${section} section`}
+                aria-current={currentSection === section ? 'page' : undefined}
               >
                 {section === 'testimonials' ? 'Reviews' : 
-                 section === 'case-studies' ? 'Case Studies' :
                  section.charAt(0).toUpperCase() + section.slice(1)}
               </motion.a>
             ))}
@@ -896,202 +1196,225 @@ export default function App() {
 
           <div className="nav-controls">
             <ThemeToggle className="nav-theme-toggle" size="medium" />
-            <div className="nav-cta-dropdown">
-              <motion.button
-                className="btn btn-primary nav-cta"
-                onClick={() => setShowContactDropdown(!showContactDropdown)}
-                whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(255, 215, 0, 0.3)" }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Get Started
-                <span className="dropdown-arrow">▼</span>
-              </motion.button>
-              
-              <AnimatePresence>
-                {showContactDropdown && (
-                  <motion.div
-                    className="contact-dropdown"
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <motion.a
-                      href="tel:+251923814125"
-                      className="dropdown-option"
-                      whileHover={{ backgroundColor: "rgba(255, 215, 0, 0.1)" }}
-                      onClick={() => setShowContactDropdown(false)}
-                    >
-                      <span className="option-icon">📞</span>
-                      <span>Call Now</span>
-                    </motion.a>
-                    
-                    <motion.a
-                      href="https://wa.me/251923814125"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="dropdown-option"
-                      whileHover={{ backgroundColor: "rgba(255, 215, 0, 0.1)" }}
-                      onClick={() => setShowContactDropdown(false)}
-                    >
-                      <span className="option-icon">💬</span>
-                      <span>WhatsApp</span>
-                    </motion.a>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            
-            {/* Mobile Menu Button */}
-            <motion.button
-              className={`mobile-menu-btn ${isMobileMenuOpen ? 'active' : ''}`}
-              onClick={toggleMobileMenu}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Toggle mobile menu"
-            >
-              <span className="hamburger-line"></span>
-              <span className="hamburger-line"></span>
-              <span className="hamburger-line"></span>
-            </motion.button>
         </div>
         </div>
 
-        {/* Mobile Menu Overlay */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              className="mobile-menu-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={closeMobileMenu}
-            >
-              <motion.div
-                className="mobile-menu"
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="mobile-menu-header">
-                  <img src="/images/LOGO.webp" alt="Awra Designs" className="mobile-menu-logo" />
-                  <motion.button
-                    className="mobile-menu-close"
-                    onClick={closeMobileMenu}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    aria-label="Close mobile menu"
-                  >
-                    ✕
-                  </motion.button>
-                </div>
+      </motion.header>
 
-                <nav className="mobile-menu-nav">
-                  {['home', 'about', 'services', 'works', 'pricing', 'contact'].map((section, index) => (
+      {/* Mobile Bottom Navigation Bar */}
+      <motion.nav
+        className="mobile-bottom-nav"
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        role="navigation"
+        aria-label="Mobile navigation"
+      >
+        {['home', 'about', 'services', 'works', 'pricing', 'contact'].map((section, index) => {
+          const icons = {
+            home: '🏠',
+            about: 'ℹ️', // Changed to info icon for better visibility
+            services: '⚙️',
+            works: '🎨',
+            pricing: '💰',
+            contact: '📞'
+          };
+          return (
                     <motion.a
                       key={section}
                       href={`#${section}`}
-                      className={`mobile-menu-link ${currentSection === section ? 'active' : ''}`}
-                      onClick={closeMobileMenu}
-                      initial={{ opacity: 0, x: 50 }}
-                      animate={{ opacity: 1, x: 0 }}
+              className={`mobile-nav-item ${currentSection === section ? 'active' : ''}`}
+              onClick={() => setCurrentSection(section)}
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      whileHover={{ x: 10 }}
-                      whileTap={{ scale: 0.95 }}
+              aria-label={`Navigate to ${section} section`}
+              aria-current={currentSection === section ? 'page' : undefined}
                     >
+              <span className="mobile-nav-icon">{icons[section] || '📄'}</span>
+              <span className="mobile-nav-label">
                       {section === 'testimonials' ? 'Reviews' : 
-                       section === 'case-studies' ? 'Case Studies' :
                        section.charAt(0).toUpperCase() + section.slice(1)}
+              </span>
+              {currentSection === section && (
+                <motion.div
+                  className="mobile-nav-indicator"
+                  layoutId="mobileNavIndicator"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
                     </motion.a>
-                  ))}
-                </nav>
+          );
+        })}
+      </motion.nav>
 
-                <div className="mobile-menu-footer">
-                  <motion.button
-                    className="btn btn-primary mobile-menu-cta"
-                    onClick={() => {
-                      closeMobileMenu();
-                      setShowGetStarted(true);
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.6 }}
-                  >
-                    Get Started
-                  </motion.button>
-                  
-                  <motion.div
-                    className="mobile-menu-contact"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.7 }}
-                  >
-                    <p>Ready to transform your space?</p>
-                    <a href="tel:+251923814125" className="mobile-menu-phone">
-                      📞 +251 923 814 125
-                    </a>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
-
-      {/* Hero Section */}
+      {/* Hero Section - Luxury Redesign */}
       <section id="home" className={`hero ${heroImageLoaded ? 'hero-loaded' : ''}`} ref={heroRef} role="main" aria-label="Main content">
         <div id="main-content" style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true"></div>
-        <animated.div className="hero-content" style={springProps}>
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="hero-title"
+        
+        {/* Luxury Background Overlay */}
+        <div className="hero-background-overlay"></div>
+        
+        {/* Animated Particles/Orbs */}
+        <div className="hero-particles">
+          {[
+            { x: -150, y: -100, delay: 0, duration: 5 },
+            { x: 150, y: -150, delay: 0.5, duration: 4.5 },
+            { x: -200, y: 100, delay: 1, duration: 6 },
+            { x: 200, y: 150, delay: 1.5, duration: 5.5 },
+            { x: 0, y: -200, delay: 2, duration: 4 },
+            { x: 0, y: 200, delay: 2.5, duration: 5 }
+          ].map((particle, i) => (
+            <motion.div
+              key={i}
+              className="hero-particle"
+              initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+              animate={{
+                opacity: [0, 0.3, 0],
+                scale: [0, 1, 0],
+                x: particle.x,
+                y: particle.y,
+              }}
+              transition={{
+                duration: particle.duration,
+                repeat: Infinity,
+                delay: particle.delay,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="hero-container">
+          {/* Left Content Section */}
+                  <motion.div
+            className="hero-content-wrapper"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
           >
-            The Future of
-            <span className="gradient-text"> Interior Design</span>
+            {/* Prestige Badge */}
+            <motion.div
+              className="hero-badge-luxury"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <span className="badge-icon">✨</span>
+              <span className="badge-text">Awra Design & Finishing</span>
+                  </motion.div>
+
+            {/* Main Title */}
+          <motion.h1
+              className="hero-title-luxury"
+              initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+            >
+              <span className="title-line title-line-1">Where Elegance</span>
+              <span className="title-line title-line-2">
+                <span className="title-accent">Meets</span> Innovation
+              </span>
           </motion.h1>
           
+            {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+              className="hero-subtitle-luxury"
+              initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="hero-subtitle"
+              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
           >
-            Professional architectural design, interior planning, finishing work, and branding services
+              Transform your space with bespoke architectural design and premium interior solutions. 
+              Crafted with precision, delivered with excellence.
           </motion.p>
           
+            {/* CTA Buttons */}
           <motion.div
-            className="hero-actions"
-            initial={{ opacity: 0, y: 30 }}
+              className="hero-actions-luxury"
+              initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.6 }}
+              transition={{ duration: 1, delay: 0.7, ease: "easeOut" }}
           >
             <motion.a
               href="#contact"
-              className="btn btn-primary"
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(255, 215, 0, 0.3)" }}
-              whileTap={{ scale: 0.95 }}
+              className="btn-luxury btn-primary-luxury"
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              aria-label="Navigate to contact section to start your design journey"
             >
-              Start Your Project
+              <span className="btn-text">Start Your Journey</span>
+              <span className="btn-arrow" aria-hidden="true">→</span>
             </motion.a>
             
             <motion.button
-              className="btn btn-primary"
-              onClick={() => setShowBookingModal(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="btn-luxury btn-secondary-luxury"
+              onClick={handleBookingClick}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              aria-label="Book a free consultation with Awra Finishing & Interior"
             >
-              📅 Book Consultation
+              <span className="btn-icon" aria-hidden="true">📅</span>
+              <span className="btn-text">Book Consultation</span>
             </motion.button>
           </motion.div>
 
-        </animated.div>
+          </motion.div>
 
+          {/* Right Visual Section */}
+          <motion.div
+            className="hero-visual"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          >
+            <div className="hero-visual-container">
+              {/* Featured Image Card */}
+              <motion.div
+                className="hero-image-card"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
+                whileHover={{ scale: 1.02, rotate: 1 }}
+              >
+                <div className="image-card-overlay"></div>
+                <LazyImage
+                  src="/images/Hero BG.webp"
+                  alt="Luxury interior design showcase featuring modern living space with elegant furniture, premium finishes, and sophisticated lighting - Awra Finishing & Interior design services"
+                  className="hero-featured-image"
+                  onLoad={() => setHeroImageLoaded(true)}
+                />
+                <div className="image-card-badge">
+                  <span className="badge-icon-small">🏆</span>
+                  <span>Featured Project</span>
+                </div>
+              </motion.div>
+
+              {/* Floating Cards */}
+              <motion.div
+                className="hero-floating-card card-1"
+                initial={{ opacity: 0, y: 30, x: -20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ duration: 1, delay: 0.8 }}
+                whileHover={{ y: -10, scale: 1.05 }}
+              >
+                <div className="floating-card-icon">✨</div>
+                <div className="floating-card-text">Premium Quality</div>
+              </motion.div>
+
+              <motion.div
+                className="hero-floating-card card-2"
+                initial={{ opacity: 0, y: 30, x: 20 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ duration: 1, delay: 1 }}
+                whileHover={{ y: -10, scale: 1.05 }}
+              >
+                <div className="floating-card-icon">🎨</div>
+                <div className="floating-card-text">Custom Design</div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* About Section */}
@@ -1219,18 +1542,24 @@ export default function App() {
                     creating timeless spaces that honor heritage while embracing innovation.
                   </p>
                   <div className="showcase-stats">
-                    <div className="stat-item">
-                      <span className="stat-number">100+</span>
-                      <span className="stat-label">Projects Completed</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">50+</span>
-                      <span className="stat-label">Happy Clients</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-number">5+</span>
-                      <span className="stat-label">Years Experience</span>
-                    </div>
+                    <CountUp 
+                      endValue="100+" 
+                      label="Projects Completed"
+                      duration={2000}
+                      delay={0}
+                    />
+                    <CountUp 
+                      endValue="50+" 
+                      label="Happy Clients"
+                      duration={2000}
+                      delay={200}
+                    />
+                    <CountUp 
+                      endValue="5+" 
+                      label="Years Experience"
+                      duration={2000}
+                      delay={400}
+                    />
                   </div>
                 </div>
               </motion.div>
@@ -1349,165 +1678,306 @@ export default function App() {
           </div>
           
           <div className="services-grid">
+            {services.map((service, index) => (
             <motion.div
+                key={service.id}
               className="service-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -10 }}
             >
               <div className="service-header">
-              <div className="service-icon">🏗️</div>
-                <div className="service-badge">Most Popular</div>
+                  <div className="service-icon">{service.icon}</div>
+                  {service.badge && (
+                    <div className="service-badge">{service.badge}</div>
+                  )}
               </div>
-              <h3>Architectural Design</h3>
-              <p>Complete building design from concept to construction drawings. We handle structural planning, space optimization, and regulatory compliance.</p>
-              <ul className="service-features">
-                <li>✓ Building design & planning</li>
-                <li>✓ Structural engineering</li>
-                <li>✓ Regulatory compliance</li>
-                <li>✓ 3D visualization</li>
-                <li>✓ Construction drawings</li>
-              </ul>
-              <div className="service-pricing">
-                <span className="price">From 80,000 ETB</span>
-                <span className="duration">2-4 months</span>
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+                <div className="service-actions">
+                  <motion.button 
+                    className="service-btn service-btn-learn"
+                    onClick={() => handleServiceClick(service)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label={`Learn more about ${service.title} service`}
+                  >
+                    Learn More
+                  </motion.button>
+                  <motion.button 
+                    className="service-btn service-btn-book"
+                    onClick={handleBookingClick}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label="Book a consultation for this service"
+                  >
+                    Book Consultation
+                  </motion.button>
               </div>
-              <button 
-                className="service-btn"
-                onClick={() => setShowQuoteCalculator(true)}
-              >
-                Get Quote
-              </button>
-            </motion.div>
-
-            <motion.div
-              className="service-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="service-header">
-              <div className="service-icon">🎨</div>
-              </div>
-              <h3>Interior Design</h3>
-              <p>Transform your spaces with functional layouts, material selection, lighting design, and furniture planning for optimal living and working environments.</p>
-              <ul className="service-features">
-                <li>✓ Space planning & layout</li>
-                <li>✓ Color scheme design</li>
-                <li>✓ Furniture selection</li>
-                <li>✓ Lighting design</li>
-                <li>✓ Material sourcing</li>
-              </ul>
-              <div className="service-pricing">
-                <span className="price">From 50,000 ETB</span>
-                <span className="duration">2-6 weeks</span>
-              </div>
-              <button 
-                className="service-btn"
-                onClick={() => setShowQuoteCalculator(true)}
-              >
-                Get Quote
-              </button>
-            </motion.div>
-
-            <motion.div
-              className="service-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="service-header">
-              <div className="service-icon">✨</div>
-              </div>
-              <h3>Finishing Work</h3>
-              <p>Premium construction finishing including flooring, painting, tiling, carpentry, and detailed craftsmanship to bring designs to life.</p>
-              <ul className="service-features">
-                <li>✓ Flooring installation</li>
-                <li>✓ Painting & wall finishes</li>
-                <li>✓ Tiling & stone work</li>
-                <li>✓ Custom carpentry</li>
-                <li>✓ Quality assurance</li>
-              </ul>
-              <div className="service-pricing">
-                <span className="price">From 30,000 ETB</span>
-                <span className="duration">1-3 weeks</span>
-              </div>
-              <button 
-                className="service-btn"
-                onClick={() => setShowQuoteCalculator(true)}
-              >
-                Get Quote
-              </button>
-            </motion.div>
-
-            <motion.div
-              className="service-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="service-header">
-              <div className="service-icon">🎯</div>
-              </div>
-              <h3>Brand Identity</h3>
-              <p>Create distinctive brand identities, logos, and visual communication systems for businesses, including signage and environmental graphics.</p>
-              <ul className="service-features">
-                <li>✓ Logo design</li>
-                <li>✓ Brand guidelines</li>
-                <li>✓ Business cards & stationery</li>
-                <li>✓ Signage design</li>
-                <li>✓ Marketing materials</li>
-              </ul>
-              <div className="service-pricing">
-                <span className="price">From 25,000 ETB</span>
-                <span className="duration">1-2 weeks</span>
-              </div>
-              <button 
-                className="service-btn"
-                onClick={() => setShowQuoteCalculator(true)}
-              >
-                Get Quote
-              </button>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
 
+          {/* Service Details Modal */}
+          <AnimatePresence>
+            {showServiceModal && selectedService && (
+              <motion.div
+                className="service-modal-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={handleCloseServiceModal}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="service-modal-title"
+              >
+                <motion.div
+                  className="service-modal-content"
+                  initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.9, opacity: 0, y: 50 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Close Button */}
+              <button 
+                    className="service-modal-close"
+                    onClick={handleCloseServiceModal}
+                    aria-label="Close service details modal"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleCloseServiceModal();
+                      }
+                    }}
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
+
+                  {/* Modal Header */}
+                  <div className="service-modal-header">
+                    <div className="service-modal-icon">{selectedService.icon}</div>
+                    <div className="service-modal-title-wrapper">
+                      {selectedService.badge && (
+                        <span className="service-modal-badge">{selectedService.badge}</span>
+                      )}
+                      <h2 id="service-modal-title" className="service-modal-title">
+                        {selectedService.title}
+                      </h2>
+                    </div>
+                  </div>
+
+                  {/* Modal Body */}
+                  <div className="service-modal-body">
+                    <div className="service-modal-description">
+                      <p>{selectedService.description}</p>
+                    </div>
+
+                    {/* Service Features */}
+                    {selectedService.features && selectedService.features.length > 0 && (
+                      <div className="service-modal-features">
+                        <h3>What's Included</h3>
+                        <ul className="service-modal-features-list">
+                          {selectedService.features.map((feature, index) => (
+                            <li key={index}>
+                              <span className="feature-check">✓</span>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Pricing Information */}
+                    <div className="service-modal-pricing">
+                      <div className="pricing-item">
+                        <span className="pricing-icon">💰</span>
+                        <div className="pricing-content">
+                          <span className="pricing-label">Starting Price</span>
+                          <span className="pricing-value">{selectedService.price}</span>
+                        </div>
+                      </div>
+                      <div className="pricing-item">
+                        <span className="pricing-icon">⏱️</span>
+                        <div className="pricing-content">
+                          <span className="pricing-label">Duration</span>
+                          <span className="pricing-value">{selectedService.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="service-modal-actions">
+                      <motion.button
+                        className="btn-luxury btn-primary-luxury"
+                        onClick={() => {
+                          handleCloseServiceModal();
+                          handleBookingClick();
+                        }}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        aria-label="Book a consultation for this service"
+                      >
+                        <span className="btn-text">Book Consultation</span>
+                        <span className="btn-arrow" aria-hidden="true">→</span>
+                      </motion.button>
+                      <motion.button
+                        className="btn-luxury btn-secondary-luxury"
+                        onClick={handleCloseServiceModal}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        aria-label="Close service details modal"
+                      >
+                        <span className="btn-text">Close</span>
+                      </motion.button>
+                    </div>
+                  </div>
+            </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Process Section */}
-          <motion.div
+            <motion.div
+            id="process"
             className="services-process"
-            initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
             viewport={{ once: true }}
           >
-            <h3>Our Process</h3>
+            <div className="process-header">
+              <motion.h3 
+                className="process-title"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                How We <span className="gradient-text">Work</span>
+              </motion.h3>
+              <motion.p 
+                className="process-subtitle"
+                initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+                A streamlined process from concept to completion
+              </motion.p>
+              </div>
+            
+            <div className="process-timeline">
             <div className="process-steps">
-              <div className="process-step">
+                <motion.div 
+                  className="process-step"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <div className="step-container">
+                    <div className="step-icon-wrapper">
+                      <div className="step-icon">🤝</div>
                 <div className="step-number">01</div>
+                      <div className="step-pulse"></div>
+                    </div>
+                    <div className="step-content">
                 <h4>Consultation</h4>
-                <p>Understanding your vision and requirements</p>
+                      <p>We start by understanding your vision, requirements, and budget. Free initial consultation to discuss your project goals.</p>
+                      <ul className="step-features">
+                        <li>Free consultation</li>
+                        <li>Needs assessment</li>
+                        <li>Budget discussion</li>
+              </ul>
+              </div>
                   </div>
-              <div className="process-step">
+                  <div className="step-connector"></div>
+            </motion.div>
+
+            <motion.div
+                  className="process-step"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <div className="step-container">
+                    <div className="step-icon-wrapper">
+                      <div className="step-icon">🎨</div>
                 <div className="step-number">02</div>
-                <h4>Design</h4>
-                <p>Creating detailed plans and 3D visualizations</p>
+                      <div className="step-pulse"></div>
+              </div>
+                    <div className="step-content">
+                      <h4>Design & Planning</h4>
+                      <p>Our team creates detailed plans, 3D visualizations, and material selections. You'll see your vision come to life before we start.</p>
+                      <ul className="step-features">
+                        <li>3D visualizations</li>
+                        <li>Detailed plans</li>
+                        <li>Material selection</li>
+              </ul>
+              </div>
                   </div>
-              <div className="process-step">
+                  <div className="step-connector"></div>
+            </motion.div>
+
+            <motion.div
+                  className="process-step"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <div className="step-container">
+                    <div className="step-icon-wrapper">
+                      <div className="step-icon">🔨</div>
                 <div className="step-number">03</div>
+                      <div className="step-pulse"></div>
+              </div>
+                    <div className="step-content">
                 <h4>Execution</h4>
-                <p>Professional implementation with quality assurance</p>
-                </div>
-              <div className="process-step">
+                      <p>Professional implementation with regular updates and quality assurance. We ensure every detail meets our high standards.</p>
+                      <ul className="step-features">
+                        <li>Regular updates</li>
+                        <li>Quality assurance</li>
+                        <li>Timeline tracking</li>
+              </ul>
+              </div>
+          </div>
+                  <div className="step-connector"></div>
+                </motion.div>
+
+          <motion.div
+                  className="process-step"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <div className="step-container">
+                    <div className="step-icon-wrapper">
+                      <div className="step-icon">📦</div>
                 <div className="step-number">04</div>
-                <h4>Delivery</h4>
-                <p>Final inspection and project handover</p>
+                      <div className="step-pulse"></div>
+                  </div>
+                    <div className="step-content">
+                      <h4>Delivery & Support</h4>
+                      <p>Final inspection, project handover, and ongoing support. We're here to ensure your complete satisfaction.</p>
+                      <ul className="step-features">
+                        <li>Final inspection</li>
+                        <li>Project handover</li>
+                        <li>Ongoing support</li>
+                      </ul>
+                  </div>
+                </div>
+                </motion.div>
                 </div>
         </div>
           </motion.div>
@@ -1551,16 +2021,29 @@ export default function App() {
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 layout
                 whileHover={{ y: -10, scale: 1.02 }}
+                onClick={() => handleProjectClick(project)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleProjectClick(project);
+                  }
+                }}
+                aria-label={`View details for ${project.title}`}
               >
               <div className="work-image">
                 <LazyImage 
                   src={project.image} 
-                  alt={`${project.title} - ${project.category} project by Awra Designs`}
+                  alt={`${project.title} - ${project.category} project showcasing ${project.description.toLowerCase()} designed and completed by Awra Finishing & Interior in ${project.year}`}
                   placeholder="Loading project image..."
                   threshold={0.1}
                   rootMargin="50px"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="work-overlay">
+                  <span className="view-details-text">View Details →</span>
                 </div>
                 {project.isFeatured && <div className="featured-badge">⭐ Featured</div>}
               </div>
@@ -1587,6 +2070,149 @@ export default function App() {
           ))}
           </AnimatePresence>
         </div>
+
+        {/* Project Description Modal */}
+        <AnimatePresence>
+          {showProjectModal && selectedProject && (
+            <motion.div
+              className="project-modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={handleCloseProjectModal}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="project-modal-title"
+            >
+              <motion.div
+                className="project-modal-content"
+                initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 50 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  className="project-modal-close"
+                  onClick={handleCloseProjectModal}
+                  aria-label="Close project details modal"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleCloseProjectModal();
+                    }
+                  }}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+
+                {/* Modal Header */}
+                <div className="project-modal-header">
+                  <div className="project-modal-badges">
+                    {selectedProject.isFeatured && (
+                      <span className="project-modal-badge featured">⭐ Featured</span>
+                    )}
+                    <span className="project-modal-badge category">{selectedProject.category}</span>
+                    <span className="project-modal-badge year">{selectedProject.year}</span>
+                  </div>
+                  <h2 id="project-modal-title" className="project-modal-title">
+                    {selectedProject.title}
+                  </h2>
+                  {selectedProject.rating && (
+                    <div className="project-modal-rating">
+                      <span className="stars">{'★'.repeat(Math.floor(selectedProject.rating))}</span>
+                      <span className="rating-value">{selectedProject.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Modal Image */}
+                <div className="project-modal-image">
+                  <LazyImage
+                    src={selectedProject.image}
+                    alt={`${selectedProject.title} - Detailed view of ${selectedProject.category} project featuring ${selectedProject.description.toLowerCase()} by Awra Finishing & Interior`}
+                    className="project-modal-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+
+                {/* Modal Body */}
+                <div className="project-modal-body">
+                  <div className="project-modal-description">
+                    <h3>Project Overview</h3>
+                    <p>{selectedProject.description}</p>
+                  </div>
+
+                  {/* Project Tags */}
+                  {selectedProject.tags && selectedProject.tags.length > 0 && (
+                    <div className="project-modal-tags">
+                      <h4>Project Tags</h4>
+                      <div className="tags-container">
+                        {selectedProject.tags.map((tag) => (
+                          <span key={tag} className="project-modal-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project Details */}
+                  <div className="project-modal-details">
+                    <div className="detail-item">
+                      <span className="detail-icon">📁</span>
+                      <div className="detail-content">
+                        <span className="detail-label">Category</span>
+                        <span className="detail-value">{selectedProject.category}</span>
+                      </div>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-icon">📅</span>
+                      <div className="detail-content">
+                        <span className="detail-label">Year</span>
+                        <span className="detail-value">{selectedProject.year}</span>
+                      </div>
+                    </div>
+                    {selectedProject.rating && (
+                      <div className="detail-item">
+                        <span className="detail-icon">⭐</span>
+                        <div className="detail-content">
+                          <span className="detail-label">Rating</span>
+                          <span className="detail-value">{selectedProject.rating.toFixed(1)} / 5</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="project-modal-actions">
+                    <motion.a
+                      href="#contact"
+                      className="btn-luxury btn-primary-luxury"
+                      onClick={() => handleCloseProjectModal()}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="btn-text">Start Similar Project</span>
+                      <span className="btn-arrow">→</span>
+                    </motion.a>
+                    <motion.button
+                      className="btn-luxury btn-secondary-luxury"
+                      onClick={handleCloseProjectModal}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="btn-text">Close</span>
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Pricing Section */}
@@ -1619,23 +2245,6 @@ export default function App() {
           <span className={monthly ? 'active' : ''}>Monthly</span>
         </motion.div>
         
-        <motion.div
-          className="quote-calculator-cta"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
-          <p>Need a custom quote? Use our instant calculator!</p>
-          <motion.button
-            className="btn btn-primary"
-            onClick={() => setShowQuoteCalculator(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            💰 Get Instant Quote
-          </motion.button>
-        </motion.div>
         
         <div className="pricing-grid">
           {pricingPlans.map((plan, idx) => (
@@ -1681,395 +2290,139 @@ export default function App() {
         </div>
       </section>
 
-      {/* Case Studies Section */}
-      <LazySection 
-        className="case-studies" 
-        id="case-studies"
-        threshold={0.1}
-        rootMargin="100px"
-      >
-        <motion.div
-          className="case-studies-container"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2>Project Case Studies</h2>
-          <p>Explore our successful projects and see how we transform spaces</p>
-          
-          <div className="case-studies-grid">
-            <motion.div
-              className="case-study-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="case-study-image">
-                <LazyImage 
-                  src="/images/work-samples-1.webp" 
-                  alt="Modern office interior design with contemporary furniture, glass partitions, and professional lighting - Awra Designs portfolio"
-                  placeholder="Loading case study..."
-                  threshold={0.1}
-                  rootMargin="100px"
-                  onLoad={() => {
-                    handleImageLoad("/images/work-samples-1.webp");
-                  }}
-                />
-                <div className="case-study-overlay">
-                  <span className="case-study-category">Office Design</span>
-                </div>
-              </div>
-              <div className="case-study-content">
-                <h3>Tech Solutions Ethiopia Office</h3>
-                <p className="case-study-description">Complete office transformation for a growing tech company. We redesigned the workspace to promote collaboration and productivity.</p>
-                <div className="case-study-details">
-                  <div className="detail-item">
-                    <span className="detail-label">Project Type:</span>
-                    <span className="detail-value">Interior Design</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Duration:</span>
-                    <span className="detail-value">6 weeks</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Budget:</span>
-                    <span className="detail-value">150,000 ETB</span>
-                  </div>
-                </div>
-                <div className="case-study-challenges">
-                  <h4>Challenges:</h4>
-                  <ul>
-                    <li>Limited space for 25 employees</li>
-                    <li>Need for flexible meeting areas</li>
-                    <li>Budget constraints</li>
-                  </ul>
-                </div>
-                <div className="case-study-solutions">
-                  <h4>Solutions:</h4>
-                  <ul>
-                    <li>Open-plan layout with modular furniture</li>
-                    <li>Convertible meeting spaces</li>
-                    <li>Smart storage solutions</li>
-                  </ul>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="case-study-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="case-study-image">
-                <LazyImage 
-                  src="/images/work-samples-2.webp" 
-                  alt="Luxury residential interior design featuring elegant living space with premium finishes, modern furniture, and sophisticated lighting - Awra Designs"
-                  placeholder="Loading case study..."
-                  threshold={0.1}
-                  rootMargin="100px"
-                  onLoad={() => {
-                    handleImageLoad("/images/work-samples-2.webp");
-                  }}
-                />
-                <div className="case-study-overlay">
-                  <span className="case-study-category">Residential</span>
-                </div>
-              </div>
-              <div className="case-study-content">
-                <h3>Bole Luxury Villa</h3>
-                <p className="case-study-description">Complete architectural design and interior finishing for a luxury villa in Bole. Modern design with traditional Ethiopian elements.</p>
-                <div className="case-study-details">
-                  <div className="detail-item">
-                    <span className="detail-label">Project Type:</span>
-                    <span className="detail-value">Full Service</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Duration:</span>
-                    <span className="detail-value">4 months</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Budget:</span>
-                    <span className="detail-value">500,000 ETB</span>
-                  </div>
-                </div>
-                <div className="case-study-challenges">
-                  <h4>Challenges:</h4>
-                  <ul>
-                    <li>Complex site conditions</li>
-                    <li>Client's specific cultural requirements</li>
-                    <li>Tight construction timeline</li>
-                  </ul>
-                </div>
-                <div className="case-study-solutions">
-                  <h4>Solutions:</h4>
-                  <ul>
-                    <li>3D visualization for client approval</li>
-                    <li>Local material sourcing</li>
-                    <li>Efficient project management</li>
-                  </ul>
-                </div>
-              </div>
-            </motion.div>
-
-          </div>
-        </motion.div>
-      </LazySection>
-
       {/* Team Section */}
       <section id="team" className="team">
-        <motion.div
-          className="team-container"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2>Meet Our Expert Team</h2>
-          <p>Professional architects, designers, and craftsmen dedicated to bringing your vision to life</p>
+        <div className="team-container">
+          <motion.div
+            className="team-header"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2>Meet Our Expert Team</h2>
+            <p>Professional architects, designers, and craftsmen dedicated to bringing your vision to life</p>
+          </motion.div>
           
-          <div className="team-scroll-container">
+          <div className="team-grid">
             <motion.div
               className="team-member"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ y: -10 }}
+              whileHover={{ y: -8 }}
             >
-              <div className="member-avatar">
-                <img 
-                  src="/images/team-photos/tesfahun-tsegaye.jpg" 
-                  alt="Tesfahun Tsegaye - Founder & Lead Architect"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍💼</div>
-              </div>
-              <div className="member-info">
-                <h3>Tesfahun Tsegaye</h3>
-                <p className="member-role">Founder & Lead Architect</p>
-                <p className="member-bio">With over 10 years of experience in architectural design, Tesfahun specializes in modern residential and commercial projects. Certified architect with expertise in sustainable design and 3D visualization.</p>
-                <div className="member-skills">
-                  <span>Architectural Design</span>
-                  <span>3D Visualization</span>
-                  <span>Project Management</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="team-member"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="member-avatar">
-                <img 
-                  src="/images/team-photos/sarah-bekele.jpg" 
-                  alt="Sarah Bekele - Senior Interior Designer"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="avatar-fallback" style={{display: 'none'}}>👩‍🎨</div>
-              </div>
-              <div className="member-info">
-                <h3>Sarah Bekele</h3>
-                <p className="member-role">Senior Interior Designer</p>
-                <p className="member-bio">Passionate about creating functional and beautiful spaces. Sarah brings 8 years of interior design experience with expertise in color theory, space planning, and material selection.</p>
-                <div className="member-skills">
-                  <span>Interior Design</span>
-                  <span>Color Theory</span>
-                  <span>Space Planning</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="team-member"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="member-avatar">
-                <img 
-                  src="/images/team-photos/daniel-haile.jpg" 
-                  alt="Daniel Haile - Master Craftsman"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍🔧</div>
-              </div>
-              <div className="member-info">
-                <h3>Daniel Haile</h3>
-                <p className="member-role">Master Craftsman</p>
-                <p className="member-bio">Expert in premium finishing work with 12 years of experience. Daniel ensures every detail is perfect, from custom carpentry to high-end finishes and installations.</p>
-                <div className="member-skills">
-                  <span>Finishing Work</span>
-                  <span>Custom Carpentry</span>
-                  <span>Quality Control</span>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="team-member"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="member-avatar">
-                <img 
-                  src="/images/team-photos/bereket-fikre.jpg" 
-                  alt="Bereket Fikre - Expert Graphic Designer"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="avatar-fallback" style={{display: 'none'}}>👨‍🎨</div>
-              </div>
-              <div className="member-info">
-                <h3>Bereket Fikre</h3>
-                <p className="member-role">Expert Graphic Designer</p>
-                <p className="member-bio">Creative graphic designer with expertise in visual branding, digital design, and marketing materials. Bereket brings innovative design solutions that enhance brand presence and visual communication.</p>
-                <div className="member-skills">
-                  <span>Graphic Design</span>
-                  <span>Brand Identity</span>
-                  <span>Digital Marketing</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section id="testimonials" className="testimonials">
-        <motion.div
-          className="testimonials-container"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2>What Our Clients Say</h2>
-          <p>Don't just take our word for it - hear from our satisfied customers</p>
-          
-          <div className="testimonials-grid">
-            <motion.div
-              className="testimonial-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -5 }}
-            >
-              <div className="testimonial-content">
-                <div className="stars">★★★★★</div>
-                <p>"Awra Designs transformed our office space completely. Their attention to detail and modern approach exceeded our expectations. The 3D visualization helped us see exactly what we were getting before construction started."</p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">
-                  <img 
-                    src="/images/client-photos/michael-tesfaye.jpg" 
-                    alt="Michael Tesfaye - CEO, Tech Solutions Ethiopia"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
+              <div className="member-image-wrapper">
+                <div className="member-avatar">
+                  <LazyImage
+                    src="/images/Tesfahun Tsegaye.webp"
+                    alt="Tesfahun Tsegaye"
+                    className=""
+                    placeholder="Loading..."
+                    onLoad={() => {}}
+                    onError={() => {}}
                   />
                   <div className="avatar-fallback" style={{display: 'none'}}>👨‍💼</div>
                 </div>
-                <div className="author-info">
-                  <h4>Michael Tesfaye</h4>
-                  <p>CEO, Tech Solutions Ethiopia</p>
-                </div>
+                <div className="member-overlay"></div>
+              </div>
+              <div className="member-content">
+                <h3>Tesfahun Tsegaye</h3>
+                <p className="member-role">Founder & Lead Architect</p>
+                <p className="member-description">With over 10 years of experience in architectural design, specializing in modern residential and commercial projects.</p>
               </div>
             </motion.div>
 
             <motion.div
-              className="testimonial-card"
-              initial={{ opacity: 0, y: 30 }}
+              className="team-member"
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -8 }}
             >
-              <div className="testimonial-content">
-                <div className="stars">★★★★★</div>
-                <p>"The AI color generator was amazing! It helped us choose the perfect color scheme for our living room. The team was professional, punctual, and delivered exactly what they promised. Highly recommended!"</p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">
-                  <img 
-                    src="/images/client-photos/sarah-bekele.jpg" 
-                    alt="Sarah Bekele - Homeowner, Bole"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
+              <div className="member-image-wrapper">
+                <div className="member-avatar">
+                  <LazyImage
+                    src="/images/Sarah Bekele.webp"
+                    alt="Sarah Bekele"
+                    className=""
+                    placeholder="Loading..."
+                    onLoad={() => {}}
+                    onError={() => {}}
                   />
-                  <div className="avatar-fallback" style={{display: 'none'}}>👩‍💼</div>
+                  <div className="avatar-fallback" style={{display: 'none'}}>👩‍🎨</div>
                 </div>
-                <div className="author-info">
-                  <h4>Sarah Bekele</h4>
-                  <p>Homeowner, Bole</p>
-                </div>
+                <div className="member-overlay"></div>
+              </div>
+              <div className="member-content">
+                <h3>Sarah Bekele</h3>
+                <p className="member-role">Senior Interior Designer</p>
+                <p className="member-description">Passionate about creating functional and beautiful spaces with expertise in color theory and space planning.</p>
               </div>
             </motion.div>
 
             <motion.div
-              className="testimonial-card"
-              initial={{ opacity: 0, y: 30 }}
+              className="team-member"
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
-              whileHover={{ y: -5 }}
+              whileHover={{ y: -8 }}
             >
-              <div className="testimonial-content">
-                <div className="stars">★★★★★</div>
-                <p>"From architectural design to finishing work, Awra Designs handled everything. Their branding services helped us create a strong visual identity. The project was completed on time and within budget."</p>
-              </div>
-              <div className="testimonial-author">
-                <div className="author-avatar">
-                  <img 
-                    src="/images/client-photos/daniel-haile.jpg" 
-                    alt="Daniel Haile - Restaurant Owner, Kazanchis"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
+              <div className="member-image-wrapper">
+                <div className="member-avatar">
+                  <LazyImage
+                    src="/images/Daniel Haile.webp"
+                    alt="Daniel Haile"
+                    className=""
+                    placeholder="Loading..."
+                    onLoad={() => {}}
+                    onError={() => {}}
                   />
-                  <div className="avatar-fallback" style={{display: 'none'}}>👨‍💻</div>
+                  <div className="avatar-fallback" style={{display: 'none'}}>👨‍🔧</div>
                 </div>
-                <div className="author-info">
-                  <h4>Daniel Haile</h4>
-                  <p>Restaurant Owner, Kazanchis</p>
+                <div className="member-overlay"></div>
+              </div>
+              <div className="member-content">
+                <h3>Daniel Haile</h3>
+                <p className="member-role">Master Craftsman</p>
+                <p className="member-description">Expert in premium finishing work ensuring every detail is perfect from custom carpentry to high-end finishes.</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="team-member"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -8 }}
+            >
+              <div className="member-image-wrapper">
+                <div className="member-avatar">
+                  <LazyImage
+                    src="/images/Bereket Fikre.webp"
+                    alt="Bereket Fikre"
+                    className=""
+                    placeholder="Loading..."
+                    onLoad={() => {}}
+                    onError={() => {}}
+                  />
+                  <div className="avatar-fallback" style={{display: 'none'}}>👨‍🎨</div>
                 </div>
+                <div className="member-overlay"></div>
+              </div>
+              <div className="member-content">
+                <h3>Bereket Fikre</h3>
+                <p className="member-role">Expert Graphic Designer</p>
+                <p className="member-description">Creative designer specializing in visual branding, digital design, and innovative brand communication solutions.</p>
               </div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </section>
-
 
       {/* Blog Section */}
       <section id="blog" className="blog">
@@ -2084,116 +2437,65 @@ export default function App() {
           <p>Stay updated with the latest trends in architecture, interior design, and construction</p>
           
           <div className="blog-grid">
+            {blogPosts.map((post, index) => (
             <motion.article
+                key={post.id}
               className="blog-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -10 }}
+                onClick={() => handleBlogClick(post)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleBlogClick(post);
+                  }
+                }}
+                aria-label={`Read full article: ${post.title}`}
             >
               <div className="blog-image">
                 <img 
-                  src="/images/work-samples-1.webp" 
-                  alt="Modern interior design trends showcasing contemporary office space with clean lines, natural lighting, and minimalist furniture arrangement"
-                  loading="eager"
+                  src={post.image} 
+                  alt={`${post.title} - ${post.description} - Design blog article by Awra Finishing & Interior`}
+                  loading="lazy"
+                  decoding="async"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
                   onLoad={() => {
-                    handleImageLoad("/images/work-samples-1.webp");
+                    handleImageLoad(post.image);
                   }}
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
                 />
-                <div className="blog-category">Interior Design</div>
+                  <div className="blog-category">{post.category}</div>
+                  <div className="blog-overlay">
+                    <span className="read-article-text">Read Article →</span>
+              </div>
               </div>
               <div className="blog-content">
                 <div className="blog-meta">
-                  <span className="blog-date">Dec 15, 2024</span>
-                  <span className="blog-read-time">5 min read</span>
+                    <span className="blog-date">{post.date}</span>
+                    <span className="blog-read-time">{post.readTime}</span>
                 </div>
-                <h3>Top 10 Interior Design Trends for 2025</h3>
-                <p>Discover the latest interior design trends that will dominate 2025, from sustainable materials to smart home integration.</p>
+                  <h3>{post.title}</h3>
+                  <p>{post.description}</p>
                 <div className="blog-tags">
-                  <span>Trends</span>
-                  <span>2025</span>
-                  <span>Modern</span>
+                    {post.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
                 </div>
               </div>
             </motion.article>
-
-            <motion.article
-              className="blog-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="blog-image">
-                <img 
-                  src="/images/work-samples-2.webp" 
-                  alt="Architectural planning guide featuring residential building design with modern facade, structural elements, and professional architectural drawings"
-                  loading="eager"
-                  onLoad={() => {
-                    handleImageLoad("/images/work-samples-2.webp");
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="blog-category">Architecture</div>
-              </div>
-              <div className="blog-content">
-                <div className="blog-meta">
-                  <span className="blog-date">Dec 10, 2024</span>
-                  <span className="blog-read-time">8 min read</span>
-                </div>
-                <h3>Complete Guide to Architectural Planning in Ethiopia</h3>
-                <p>Everything you need to know about architectural planning, permits, and regulations in Ethiopia for your next project.</p>
-                <div className="blog-tags">
-                  <span>Planning</span>
-                  <span>Ethiopia</span>
-                  <span>Permits</span>
-                </div>
-              </div>
-            </motion.article>
-
-            <motion.article
-              className="blog-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10 }}
-            >
-              <div className="blog-image">
-                <img 
-                  src="/images/work-samples-3.webp" 
-                  alt="Color psychology in design showcasing interior space with carefully selected color palette, warm lighting, and harmonious color scheme"
-                  loading="eager"
-                  onLoad={() => {
-                    handleImageLoad("/images/work-samples-3.webp");
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="blog-category">Design Tips</div>
-              </div>
-              <div className="blog-content">
-                <div className="blog-meta">
-                  <span className="blog-date">Dec 5, 2024</span>
-                  <span className="blog-read-time">6 min read</span>
-                </div>
-                <h3>Color Psychology: How Colors Affect Your Space</h3>
-                <p>Learn how different colors can influence mood, productivity, and well-being in your home and office spaces.</p>
-                <div className="blog-tags">
-                  <span>Colors</span>
-                  <span>Psychology</span>
-                  <span>Wellness</span>
-                </div>
-              </div>
-            </motion.article>
+            ))}
           </div>
           
           <motion.div
@@ -2235,6 +2537,144 @@ export default function App() {
             </form>
           </motion.div>
         </motion.div>
+
+        {/* Blog Description Modal */}
+        <AnimatePresence>
+          {showBlogModal && selectedBlogPost && (
+            <motion.div
+              className="blog-modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={handleCloseBlogModal}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="blog-modal-title"
+            >
+              <motion.div
+                className="blog-modal-content"
+                initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 50 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  className="blog-modal-close"
+                  onClick={handleCloseBlogModal}
+                  aria-label="Close blog article details modal"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleCloseBlogModal();
+                    }
+                  }}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+
+                {/* Modal Header */}
+                <div className="blog-modal-header">
+                  <div className="blog-modal-badges">
+                    <span className="blog-modal-badge category">{selectedBlogPost.category}</span>
+                    <span className="blog-modal-badge date">{selectedBlogPost.date}</span>
+                    <span className="blog-modal-badge read-time">{selectedBlogPost.readTime}</span>
+                  </div>
+                  <h2 id="blog-modal-title" className="blog-modal-title">
+                    {selectedBlogPost.title}
+                  </h2>
+                </div>
+
+                {/* Modal Image */}
+                <div className="blog-modal-image">
+                  <img
+                    src={selectedBlogPost.image}
+                    alt={`${selectedBlogPost.title} - Featured image for design blog article: ${selectedBlogPost.description} by Awra Finishing & Interior`}
+                    className="blog-modal-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+
+                {/* Modal Body */}
+                <div className="blog-modal-body">
+                  <div className="blog-modal-description">
+                    <h3>Article Overview</h3>
+                    <p>{selectedBlogPost.description}</p>
+                  </div>
+
+                  <div className="blog-modal-full-content">
+                    <h3>Full Article</h3>
+                    <p>{selectedBlogPost.fullContent}</p>
+                  </div>
+
+                  {/* Blog Tags */}
+                  {selectedBlogPost.tags && selectedBlogPost.tags.length > 0 && (
+                    <div className="blog-modal-tags">
+                      <h4>Topics</h4>
+                      <div className="tags-container">
+                        {selectedBlogPost.tags.map((tag) => (
+                          <span key={tag} className="blog-modal-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Blog Meta Details */}
+                  <div className="blog-modal-details">
+                    <div className="detail-item">
+                      <span className="detail-icon">📁</span>
+                      <div className="detail-content">
+                        <span className="detail-label">Category</span>
+                        <span className="detail-value">{selectedBlogPost.category}</span>
+                      </div>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-icon">📅</span>
+                      <div className="detail-content">
+                        <span className="detail-label">Published</span>
+                        <span className="detail-value">{selectedBlogPost.date}</span>
+                      </div>
+                    </div>
+                    <div className="detail-item">
+                      <span className="detail-icon">⏱️</span>
+                      <div className="detail-content">
+                        <span className="detail-label">Reading Time</span>
+                        <span className="detail-value">{selectedBlogPost.readTime}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="blog-modal-actions">
+                    <motion.a
+                      href="#contact"
+                      className="btn-luxury btn-primary-luxury"
+                      onClick={() => handleCloseBlogModal()}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="btn-text">Get Expert Advice</span>
+                      <span className="btn-arrow">→</span>
+                    </motion.a>
+                    <motion.button
+                      className="btn-luxury btn-secondary-luxury"
+                      onClick={handleCloseBlogModal}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="btn-text">Close</span>
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* FAQ Section */}
@@ -2465,57 +2905,121 @@ export default function App() {
           viewport={{ once: true }}
         >
           <div className="contact-info">
-            <h2>Ready to Transform Your Space?</h2>
-            <p>Let our expert design team create your perfect space with professional craftsmanship</p>
-            
             <div className="contact-methods">
-              <motion.div 
+              <motion.a 
+                href="tel:+251923814125"
                 className="contact-method"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Call us"
               >
                 <div className="contact-icon">📞</div>
-                <div>
+                <div className="contact-content">
                   <h4>Phone</h4>
                   <p>+251 923 814 125</p>
                 </div>
-              </motion.div>
+              </motion.a>
               
-              <motion.div 
+              <motion.a 
+                href="https://t.me/Traw12"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="contact-method"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Message us on Telegram"
               >
-                <div className="contact-icon">📧</div>
-                <div>
-                  <h4>Email</h4>
-                  <p>info@awradesigns.com</p>
+                <div className="contact-icon">✈️</div>
+                <div className="contact-content">
+                  <h4>Telegram</h4>
+                  <p>@Traw12</p>
                 </div>
-              </motion.div>
+              </motion.a>
               
-              <motion.div 
+              <motion.a 
+                href="https://wa.me/251923814125"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="contact-method"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Message us on WhatsApp"
               >
                 <div className="contact-icon">💬</div>
-                <div>
+                <div className="contact-content">
                   <h4>WhatsApp</h4>
                   <p>+251 923 814 125</p>
                 </div>
-              </motion.div>
+              </motion.a>
               
-              <motion.div 
+              <motion.a 
+                href="https://instagram.com/awradesigns"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="contact-method"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Follow us on Instagram"
+              >
+                <div className="contact-icon">📷</div>
+                <div className="contact-content">
+                  <h4>Instagram</h4>
+                  <p>@awradesigns</p>
+                </div>
+              </motion.a>
+              
+              <motion.a 
+                href="https://www.tiktok.com/@awrainteriors"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-method"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Follow us on TikTok"
+              >
+                <div className="contact-icon">🎵</div>
+                <div className="contact-content">
+                  <h4>TikTok</h4>
+                  <p>@awrainteriors</p>
+                </div>
+              </motion.a>
+              
+              <motion.a 
+                href="mailto:info@awradesigns.com"
+                className="contact-method"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="Email us"
+              >
+                <div className="contact-icon">📧</div>
+                <div className="contact-content">
+                  <h4>Email</h4>
+                  <p>info@awradesigns.com</p>
+                </div>
+              </motion.a>
+              
+              <motion.a 
+                href="https://www.google.com/maps/search/?api=1&query=9.1450,38.7756"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-method"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                role="button"
+                aria-label="View location on Google Maps"
               >
                 <div className="contact-icon">📍</div>
-                <div>
+                <div className="contact-content">
                   <h4>Location</h4>
                   <p>Bole, Addis Ababa, Ethiopia</p>
                 </div>
-              </motion.div>
+              </motion.a>
               
               <motion.div 
                 className="contact-method"
@@ -2523,7 +3027,7 @@ export default function App() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="contact-icon">🕒</div>
-                <div>
+                <div className="contact-content">
                   <h4>Business Hours</h4>
                   <p>Mon-Fri: 9AM-6PM<br/>Sat: 10AM-4PM</p>
                 </div>
@@ -2552,10 +3056,21 @@ export default function App() {
                   type="email" 
                   id="contactEmail" 
                   name="contactEmail" 
-                  placeholder="Your Email" 
+                  placeholder="your.email@example.com" 
                   value={contactForm.email}
                   onChange={(e) => handleContactFormChange('email', e.target.value)}
                   required 
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="contactPhone">Phone Number</label>
+                <input 
+                  type="tel" 
+                  id="contactPhone" 
+                  name="contactPhone" 
+                  placeholder="0923814125" 
+                  value={contactForm.phone}
+                  onChange={(e) => handleContactFormChange('phone', e.target.value)}
                 />
               </div>
               <div className="form-group">
@@ -2572,6 +3087,62 @@ export default function App() {
                   <option value="commercial">Commercial</option>
                   <option value="office">Office</option>
                   <option value="retail">Retail</option>
+                  <option value="restaurant">Restaurant</option>
+                  <option value="hospitality">Hospitality</option>
+                </select>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="contactBudget">Budget Range</label>
+                  <select 
+                    id="contactBudget" 
+                    name="contactBudget" 
+                    value={contactForm.budget}
+                    onChange={(e) => handleContactFormChange('budget', e.target.value)}
+                  >
+                    <option value="">Select budget range</option>
+                    <option value="under-100k">Under 100,000 ETB</option>
+                    <option value="100k-500k">100,000 - 500,000 ETB</option>
+                    <option value="500k-1m">500,000 - 1,000,000 ETB</option>
+                    <option value="1m-2m">1,000,000 - 2,000,000 ETB</option>
+                    <option value="over-2m">Over 2,000,000 ETB</option>
+                    <option value="not-sure">Not sure yet</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="contactTimeline">Project Timeline</label>
+                  <select 
+                    id="contactTimeline" 
+                    name="contactTimeline" 
+                    value={contactForm.timeline}
+                    onChange={(e) => handleContactFormChange('timeline', e.target.value)}
+                  >
+                    <option value="">Select timeline</option>
+                    <option value="asap">As soon as possible</option>
+                    <option value="1-3-months">1-3 months</option>
+                    <option value="3-6-months">3-6 months</option>
+                    <option value="6-12-months">6-12 months</option>
+                    <option value="over-12-months">Over 12 months</option>
+                    <option value="planning">Just planning</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="contactHearAboutUs">How did you hear about us?</label>
+                <select 
+                  id="contactHearAboutUs" 
+                  name="contactHearAboutUs" 
+                  value={contactForm.hearAboutUs}
+                  onChange={(e) => handleContactFormChange('hearAboutUs', e.target.value)}
+                >
+                  <option value="">Select an option</option>
+                  <option value="google">Google Search</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="referral">Referral/Friend</option>
+                  <option value="website">Saw your website</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div className="form-group">
@@ -2579,8 +3150,8 @@ export default function App() {
                 <textarea 
                   id="contactMessage" 
                   name="contactMessage" 
-                  placeholder="Tell us about your vision..." 
-                  rows={4} 
+                  placeholder="Tell us about your vision, requirements, or any specific ideas you have in mind..." 
+                  rows={5} 
                   value={contactForm.message}
                   onChange={(e) => handleContactFormChange('message', e.target.value)}
                   required
@@ -2604,160 +3175,21 @@ export default function App() {
                 whileHover={{ scale: formSubmissions.contact.status === 'loading' ? 1 : 1.05 }}
                 whileTap={{ scale: formSubmissions.contact.status === 'loading' ? 1 : 0.95 }}
               >
-                {formSubmissions.contact.status === 'loading' ? 'Sending...' : 'Send Message'}
-              </motion.button>
+                {formSubmissions.contact.status === 'loading' ? (
+                  <>
+                    <span className="loading-spinner">⏳</span>
+                    Sending...
+                        </>
+                      ) : (
+                  'Send Message'
+                )}
+                  </motion.button>
             </form>
-          </div>
-        </motion.div>
+              </div>
+            </motion.div>
         
       </section>
 
-      {/* Quote Calculator Modal */}
-      <AnimatePresence>
-        {showQuoteCalculator && (
-          <motion.div
-            className="quote-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowQuoteCalculator(false)}
-          >
-            <motion.div
-              className="quote-content"
-              initial={{ scale: 0.8, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 50 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="quote-header">
-                <h3>Instant Quote Calculator</h3>
-                <button 
-                  className="close-btn"
-                  onClick={() => setShowQuoteCalculator(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="quote-body">
-                <div className="quote-form">
-                  <div className="form-group">
-                    <label htmlFor="quoteService">Service Type</label>
-                    <select 
-                      id="quoteService" 
-                      name="quoteService"
-                      value={quoteData.service}
-                      onChange={(e) => handleQuoteInputChange('service', e.target.value)}
-                    >
-                      <option value="">Select service</option>
-                      <option value="architectural">Architectural Design</option>
-                      <option value="interior">Interior Design</option>
-                      <option value="finishing">Finishing Work</option>
-                      <option value="branding">Branding</option>
-                      <option value="full-service">Full Service</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteArea">Area (sqm)</label>
-                    <input 
-                      type="number" 
-                      id="quoteArea" 
-                      name="quoteArea"
-                      value={quoteData.area}
-                      onChange={(e) => handleQuoteInputChange('area', e.target.value)}
-                      placeholder="Enter area in square meters"
-                    />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteComplexity">Project Complexity</label>
-                    <select 
-                      id="quoteComplexity" 
-                      name="quoteComplexity"
-                      value={quoteData.complexity}
-                      onChange={(e) => handleQuoteInputChange('complexity', e.target.value)}
-                    >
-                      <option value="simple">Simple</option>
-                      <option value="medium">Medium</option>
-                      <option value="complex">Complex</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="quoteTimeline">Timeline</label>
-                    <select 
-                      id="quoteTimeline" 
-                      name="quoteTimeline"
-                      value={quoteData.timeline}
-                      onChange={(e) => handleQuoteInputChange('timeline', e.target.value)}
-                    >
-                      <option value="flexible">Flexible (10% discount)</option>
-                      <option value="normal">Normal</option>
-                      <option value="urgent">Urgent (30% premium)</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="quote-result">
-                  <div className="quote-display">
-                    <h4>Estimated Cost</h4>
-                    <div className="quote-amount">
-                      {calculateQuote() > 0 ? (
-                        <>
-                          <span className="amount">{calculateQuote().toLocaleString()}</span>
-                          <span className="currency">ETB</span>
-                        </>
-                      ) : (
-                        <span className="placeholder">Enter details above</span>
-                      )}
-                    </div>
-                    <p className="quote-note">
-                      *This is an estimate. Final pricing may vary based on specific requirements.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="quote-actions">
-                  <motion.button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowQuoteCalculator(false)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Close
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      if (calculateQuote() > 0) {
-                        showBeautifulModal(
-                          'Quote Request Sent!',
-                          '📧 Quote details sent! We will contact you within 24 hours with a detailed proposal.',
-                          'success'
-                        );
-                        setShowQuoteCalculator(false);
-                      } else {
-                        showBeautifulModal(
-                          'Incomplete Information',
-                          'Please fill in all required fields to get a quote.',
-                          'warning'
-                        );
-                      }
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Get Detailed Quote
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Booking Modal */}
       <AnimatePresence>
@@ -2767,7 +3199,7 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowBookingModal(false)}
+            onClick={handleCloseBookingModal}
           >
             <motion.div
               className="booking-content"
@@ -2780,9 +3212,16 @@ export default function App() {
                 <h3>Book Your Free Consultation</h3>
                 <button 
                   className="close-btn"
-                  onClick={() => setShowBookingModal(false)}
+                  onClick={handleCloseBookingModal}
+                  aria-label="Close booking consultation form"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleCloseBookingModal();
+                    }
+                  }}
                 >
-                  ✕
+                  <span aria-hidden="true">✕</span>
                 </button>
               </div>
               
@@ -2913,7 +3352,7 @@ export default function App() {
                     <motion.button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={() => setShowBookingModal(false)}
+                      onClick={handleCloseBookingModal}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -2949,7 +3388,10 @@ export default function App() {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-          <img src="/images/LOGO.webp" alt="Awra Finishing & Interior - Professional Architecture and Design Company Logo" className="footer-logo" />
+          <ThemeAwareLogo 
+            className="footer-logo" 
+            alt="Awra Finishing & Interior - Professional Architecture and Interior Design Company Logo"
+          />
               <h3>Awra Finishing & Interior</h3>
               <p>Creating exceptional architectural spaces and compelling brands with professional design and premium finishing services.</p>
             </motion.div>
@@ -2964,11 +3406,10 @@ export default function App() {
             >
               <h4>Our Services</h4>
               <ul className="footer-links">
-                <li><a href="#services">Architectural Design</a></li>
-                <li><a href="#services">Interior Design</a></li>
-                <li><a href="#services">Finishing Work</a></li>
-                <li><a href="#services">Brand Identity</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#services" onClick={() => setCurrentSection('services')}>Architectural Design</a></li>
+                <li><a href="#services" onClick={() => setCurrentSection('services')}>Interior Design</a></li>
+                <li><a href="#services" onClick={() => setCurrentSection('services')}>Finishing Work</a></li>
+                <li><a href="#services" onClick={() => setCurrentSection('services')}>Brand Identity</a></li>
               </ul>
             </motion.div>
 
@@ -2982,11 +3423,10 @@ export default function App() {
             >
               <h4>Company</h4>
               <ul className="footer-links">
-                <li><a href="#about">About Us</a></li>
-                <li><a href="#portfolio">Our Work</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#testimonials">Testimonials</a></li>
-                <li><a href="#process">Our Process</a></li>
+                <li><a href="#about" onClick={() => setCurrentSection('about')}>About Us</a></li>
+                <li><a href="#works" onClick={() => setCurrentSection('works')}>Our Work</a></li>
+                <li><a href="#contact" onClick={() => setCurrentSection('contact')}>Contact</a></li>
+                <li><a href="#process" onClick={() => setCurrentSection('process')}>Our Process</a></li>
               </ul>
             </motion.div>
 
@@ -3038,8 +3478,26 @@ export default function App() {
           <div className="footer-bottom-content">
           <p>© {new Date().getFullYear()} Awra Finishing & Interior. All rights reserved.</p>
             <div className="footer-legal">
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowPrivacyModal(true); }}>Privacy Policy</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }}>Terms of Service</a>
+              <a 
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  setShowPrivacyModal(true);
+                  document.body.style.overflow = 'hidden';
+                }}
+              >
+                Privacy Policy
+              </a>
+              <a 
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  setShowTermsModal(true);
+                  document.body.style.overflow = 'hidden';
+                }}
+              >
+                Terms of Service
+              </a>
             </div>
           </div>
         </div>
@@ -3301,7 +3759,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowPrivacyModal(false)}
+            onClick={() => {
+              setShowPrivacyModal(false);
+              document.body.style.overflow = '';
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="privacy-modal-title"
           >
             <motion.div
               className="legal-modal-content"
@@ -3312,10 +3776,14 @@ export default function App() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="legal-modal-header">
-                <h2>Privacy Policy</h2>
+                <h2 id="privacy-modal-title">Privacy Policy</h2>
                 <motion.button
                   className="legal-modal-close"
-                  onClick={() => setShowPrivacyModal(false)}
+                  onClick={() => {
+                    setShowPrivacyModal(false);
+                    document.body.style.overflow = '';
+                  }}
+                  aria-label="Close privacy policy"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -3388,7 +3856,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowTermsModal(false)}
+            onClick={() => {
+              setShowTermsModal(false);
+              document.body.style.overflow = '';
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="terms-modal-title"
           >
             <motion.div
               className="legal-modal-content"
@@ -3399,10 +3873,14 @@ export default function App() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="legal-modal-header">
-                <h2>Terms of Service</h2>
+                <h2 id="terms-modal-title">Terms of Service</h2>
                 <motion.button
                   className="legal-modal-close"
-                  onClick={() => setShowTermsModal(false)}
+                  onClick={() => {
+                    setShowTermsModal(false);
+                    document.body.style.overflow = '';
+                  }}
+                  aria-label="Close terms of service"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                 >
@@ -3510,6 +3988,9 @@ export default function App() {
           </motion.button>
         )}
       </AnimatePresence>
+
+      {/* Scroll Progress Indicator */}
+      <ScrollProgress />
     </div>
   );
 }

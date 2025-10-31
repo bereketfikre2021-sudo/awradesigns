@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import CountUp from './CountUp';
 
 const WhyChooseUsLight = () => {
   const features = [
@@ -102,10 +103,14 @@ const WhyChooseUsLight = () => {
               {feature.stats && (
                 <div className="feature-stats-light">
                   {feature.stats.map((stat, statIndex) => (
-                    <div key={statIndex} className="stat-item-light">
-                      <span className="stat-number-light">{stat.number}</span>
-                      <span className="stat-label-light">{stat.label}</span>
-                    </div>
+                    <CountUp 
+                      key={statIndex}
+                      endValue={stat.number} 
+                      label={stat.label}
+                      duration={2000}
+                      delay={statIndex * 200}
+                      className="stat-item-light"
+                    />
                   ))}
                 </div>
               )}
@@ -123,28 +128,6 @@ const WhyChooseUsLight = () => {
           ))}
         </div>
 
-        {/* Call to Action */}
-        <motion.div
-          className="cta-section-light"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <div className="cta-content-light">
-            <h3 className="cta-title-light">Ready to Transform Your Space?</h3>
-            <p className="cta-description-light">
-              Let's discuss your project and bring your vision to life with our expert design and finishing services.
-            </p>
-            <motion.button
-              className="cta-button-light"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started Today
-            </motion.button>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

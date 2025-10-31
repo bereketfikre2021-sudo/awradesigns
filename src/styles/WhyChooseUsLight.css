@@ -6,7 +6,7 @@
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%);
   position: relative;
   overflow: hidden;
-  padding: 6rem 0;
+  padding: 8rem 0;
   border-top: 1px solid #e9ecef;
   border-bottom: 1px solid #e9ecef;
 }
@@ -19,13 +19,13 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+    radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
 .why-choose-container-light {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
   position: relative;
@@ -35,7 +35,7 @@
 /* Hero Header */
 .why-choose-hero-light {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 6rem;
 }
 
 .hero-content-light {
@@ -79,7 +79,7 @@
 }
 
 .hero-title-light {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
   margin-bottom: 1.5rem;
   line-height: 1.1;
@@ -100,19 +100,213 @@
 }
 
 .hero-subtitle-light {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   color: #6c757d;
   line-height: 1.6;
   max-width: 600px;
   margin: 0 auto;
 }
 
-/* Features Grid */
+/* Main Content Grid */
+.why-choose-main-light {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-bottom: 6rem;
+  align-items: start;
+}
+
+/* Feature Showcase - Left Column */
+.feature-showcase-light {
+  position: relative;
+}
+
+.showcase-card-light {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border: 1px solid #e9ecef;
+  border-radius: 24px;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 215, 0, 0.1);
+  transition: all 0.4s ease;
+}
+
+.showcase-card-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+  background-size: 200% 100%;
+  animation: shimmer-light 2s ease-in-out infinite;
+}
+
+@keyframes shimmer-light {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+
+.showcase-card-light:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 30px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 215, 0, 0.2);
+}
+
+.showcase-header-light {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.showcase-icon-light {
+  position: relative;
+}
+
+.icon-bg-light {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.icon-bg-light::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: rotate(45deg);
+  transition: all 0.6s ease;
+}
+
+.showcase-card-light:hover .icon-bg-light::before {
+  animation: shine-light 0.8s ease;
+}
+
+@keyframes shine-light {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.showcase-badge-light {
+  background: rgba(255, 215, 0, 0.1);
+  color: #b8860b;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.showcase-card-light h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.showcase-card-light p {
+  color: #6c757d;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
+}
+
+.showcase-stats-light {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.stat-item-light {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: rgba(255, 215, 0, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-item-light:hover {
+  background: rgba(255, 215, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-number-light {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #b8860b;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.stat-number-light.animating {
+  animation: numberPulseLight 0.6s ease-out;
+}
+
+@keyframes numberPulseLight {
+  0% { 
+    transform: scale(1);
+    color: #b8860b;
+  }
+  50% { 
+    transform: scale(1.1);
+    color: #ffd700;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+  100% { 
+    transform: scale(1);
+    color: #b8860b;
+  }
+}
+
+.stat-label-light {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Features Grid - Right Column */
 .features-grid-light {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
-  margin-bottom: 4rem;
+  height: 100%;
+  align-content: start;
+}
+
+/* Feature Row for side-by-side cards */
+.feature-row-light {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+  height: 100%;
+}
+
+/* Half-width feature cards - True rectangular layout */
+.feature-card-half-light {
+  padding: 3rem 2.5rem;
+  height: 100%;
 }
 
 .feature-card-light {
@@ -139,10 +333,6 @@
   animation: shimmer-light 2s ease-in-out infinite;
 }
 
-@keyframes shimmer-light {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
 
 .feature-card-light:hover {
   transform: translateY(-8px);
@@ -324,6 +514,13 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .why-choose-main-light {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
 @media (max-width: 768px) {
   .why-choose-us-light {
     padding: 4rem 0;
@@ -346,21 +543,22 @@
     gap: 1.5rem;
   }
   
+  .feature-row-light {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
   .feature-card-light {
     padding: 2rem;
   }
   
-  .feature-stats-light {
+  .showcase-stats-light {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
   }
   
-  .cta-section-light {
-    padding: 2rem 1.5rem;
-  }
-  
-  .cta-title-light {
-    font-size: 1.75rem;
+  .stat-item-light {
+    padding: 1rem;
   }
 }
 

@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'images/*.webp'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'images/*.webp', 'images/LOGO-dark.webp', 'images/LOGO-light.webp', 'images/Tesfahun Tsegaye.webp', 'images/Sarah Bekele.webp', 'images/Daniel Haile.webp', 'images/Bereket Fikre.webp'],
       manifest: {
         name: 'Awra Finishing & Interior - Professional Architecture & Design',
         short_name: 'Awra Interior',
@@ -23,13 +23,13 @@ export default defineConfig({
         categories: ['business', 'productivity', 'design'],
         icons: [
           {
-            src: '/images/LOGO.webp',
+            src: '/images/LOGO-dark.webp',
             sizes: '192x192',
             type: 'image/webp',
             purpose: 'any maskable'
           },
           {
-            src: '/images/LOGO.webp',
+            src: '/images/LOGO-dark.webp',
             sizes: '512x512',
             type: 'image/webp',
             purpose: 'any maskable'
@@ -120,5 +120,6 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   },
-  base: './'
+  base: '/',
+  publicDir: 'public'
 })

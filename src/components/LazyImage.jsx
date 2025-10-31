@@ -98,7 +98,7 @@ const LazyImage = ({
         <img
           ref={imgRef}
           src={imageSrc}
-          alt={alt}
+          alt={alt || 'Image'}
           onLoad={handleLoad}
           onError={handleError}
           style={{
@@ -110,6 +110,8 @@ const LazyImage = ({
             display: isError ? 'none' : 'block'
           }}
           loading="lazy"
+          decoding="async"
+          fetchPriority="low"
           {...props}
         />
       )}
