@@ -2,10 +2,22 @@
 # This ensures static assets are served correctly and SPA routing works
 
 # Serve static assets (images, CSS, JS, fonts, etc.) - these should exist
-/images/*  /images/:splat  200
-/assets/*  /assets/:splat  200
-/css/*     /css/:splat     200
+# Use force: true to ensure these are served before SPA redirect
+/images/*  /images/:splat  200!
+/assets/*  /assets/:splat  200!
+/css/*     /css/:splat     200!
+/*.webp    /:splat.webp    200!
+/*.png     /:splat.png     200!
+/*.jpg     /:splat.jpg     200!
+/*.jpeg    /:splat.jpeg    200!
+/*.svg     /:splat.svg     200!
+/*.ico     /:splat.ico      200!
+/*.woff    /:splat.woff    200!
+/*.woff2   /:splat.woff2   200!
+/*.css     /:splat.css     200!
+/*.js      /:splat.js       200!
 
 # SPA fallback - redirect all other requests to index.html
+# This must come LAST so static assets are matched first
 /*    /index.html   200
 
