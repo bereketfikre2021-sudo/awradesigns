@@ -1,0 +1,11 @@
+# Netlify redirects file
+# This ensures static assets are served correctly and SPA routing works
+
+# Serve static assets (images, CSS, JS, fonts, etc.) - these should exist
+/images/*  /images/:splat  200
+/assets/*  /assets/:splat  200
+/css/*     /css/:splat     200
+
+# SPA fallback - redirect all other requests to index.html
+/*    /index.html   200
+
