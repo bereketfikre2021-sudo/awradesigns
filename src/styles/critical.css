@@ -38,6 +38,19 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Prevent layout shift */
+  height: 100%;
+  /* Optimize font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Root element optimization */
+#root {
+  min-height: 100vh;
+  /* Prevent layout shift */
+  contain: layout style paint;
 }
 
 body {
@@ -47,6 +60,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Critical Navigation Styles */

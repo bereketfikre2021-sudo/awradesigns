@@ -65,6 +65,7 @@ export default function App() {
     return metaData[section] || metaData.home;
   };
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [selectedBlogPost, setSelectedBlogPost] = useState(null);
@@ -150,6 +151,23 @@ export default function App() {
     getStarted: { status: 'idle', message: '' }
   });
 
+  // Real-time validation errors
+  const [contactFormErrors, setContactFormErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    message: ''
+  });
+
+  const [contactFormTouched, setContactFormTouched] = useState({
+    name: false,
+    email: false,
+    phone: false,
+    projectType: false,
+    message: false
+  });
+
   // Beautiful Modal System
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({
@@ -190,10 +208,21 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Loading simulation
+  // Loading simulation with progress
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        const newProgress = Math.min(prev + Math.random() * 15, 100);
+        if (newProgress >= 100) {
+          clearInterval(progressInterval);
+          setTimeout(() => setIsLoading(false), 300);
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 100);
+
+    return () => clearInterval(progressInterval);
   }, []);
 
   // Performance monitoring
@@ -323,11 +352,85 @@ export default function App() {
   }, [showProjectModal, showBlogModal, showServiceModal, showBookingModal, showPrivacyModal, showTermsModal]);
 
 
+  // Real-time field validation
+  const validateField = (field, value) => {
+    let error = '';
+
+    switch (field) {
+      case 'name':
+        if (!value.trim()) {
+          error = 'Name is required';
+        } else if (value.trim().length < 2) {
+          error = 'Name must be at least 2 characters';
+        }
+        break;
+      
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            error = 'Please enter a valid email address';
+          }
+        }
+        break;
+      
+      case 'phone':
+        if (value.trim() && value.trim().length < 10) {
+          error = 'Phone number must be at least 10 digits';
+        }
+        break;
+      
+      case 'projectType':
+        if (!value) {
+          error = 'Please select a project type';
+        }
+        break;
+      
+      case 'message':
+        if (!value.trim()) {
+          error = 'Message is required';
+        } else if (value.trim().length < 10) {
+          error = 'Message must be at least 10 characters';
+        }
+        break;
+      
+      default:
+        break;
+    }
+
+    return error;
+  };
+
   // Form input handlers
   const handleContactFormChange = (field, value) => {
     setContactForm(prev => ({
       ...prev,
       [field]: value
+    }));
+
+    // Real-time validation on change (only if field has been touched)
+    if (contactFormTouched[field]) {
+      const error = validateField(field, value);
+      setContactFormErrors(prev => ({
+        ...prev,
+        [field]: error
+      }));
+    }
+  };
+
+  const handleContactFormBlur = (field) => {
+    setContactFormTouched(prev => ({
+      ...prev,
+      [field]: true
+    }));
+
+    // Validate on blur
+    const error = validateField(field, contactForm[field]);
+    setContactFormErrors(prev => ({
+      ...prev,
+      [field]: error
     }));
   };
 
@@ -422,9 +525,24 @@ export default function App() {
   const handleContactFormSubmit = async (e) => {
     e.preventDefault();
     
+    // Mark all fields as touched before validation
+    const allFields = ['name', 'email', 'phone', 'projectType', 'message'];
+    allFields.forEach(field => {
+      setContactFormTouched(prev => ({ ...prev, [field]: true }));
+      const error = validateField(field, contactForm[field]);
+      setContactFormErrors(prev => ({ ...prev, [field]: error }));
+    });
+
     // Validate form before submission
     if (!validateContactForm()) {
-      return;
+      // Check if there are any validation errors
+      const hasErrors = allFields.some(field => {
+        const error = validateField(field, contactForm[field]);
+        return !!error;
+      });
+      if (hasErrors) {
+        return;
+      }
     }
     
     setFormSubmissions(prev => ({
@@ -478,6 +596,22 @@ export default function App() {
           message: ''
         });
         
+        // Reset validation states
+        setContactFormErrors({
+          name: '',
+          email: '',
+          phone: '',
+          projectType: '',
+          message: ''
+        });
+        setContactFormTouched({
+          name: false,
+          email: false,
+          phone: false,
+          projectType: false,
+          message: false
+        });
+        
         // Clear success message after 5 seconds
         setTimeout(() => {
           setFormSubmissions(prev => ({
@@ -500,6 +634,18 @@ export default function App() {
       
     } catch (error) {
       console.error('Form submission error:', error);
+      
+      // Report error to error reporting service
+      try {
+        const { reportAPIError } = await import('./services/errorReporting');
+        reportAPIError(error, {
+          formType: 'contact',
+          endpoint: 'formspree',
+          hasData: true,
+        });
+      } catch (reportingError) {
+        console.error('Failed to report error:', reportingError);
+      }
       
       let errorMessage = 'Sorry, there was an error. Please try again or contact us directly.';
       if (error.name === 'AbortError') {
@@ -613,6 +759,17 @@ export default function App() {
       }
       
     } catch (error) {
+      // Report error to error reporting service
+      try {
+        const { reportAPIError } = await import('./services/errorReporting');
+        reportAPIError(error, {
+          formType: 'newsletter',
+          endpoint: 'formspree',
+        });
+      } catch (reportingError) {
+        console.error('Failed to report error:', reportingError);
+      }
+      
       setFormSubmissions(prev => ({
         ...prev,
         newsletter: { status: 'error', message: 'Subscription failed. Please try again.' }
@@ -912,33 +1069,66 @@ export default function App() {
   });
 
   if (isLoading) {
-  return (
-      <div className="loading-screen">
+    return (
+      <motion.div
+        className="loading-screen"
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="loading-content">
           <motion.div
             className="loading-logo"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ 
+              duration: 0.8, 
+              ease: "easeOut",
+              type: "spring",
+              stiffness: 100
+            }}
           >
-            <ThemeAwareLogo />
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            Loading the Future of Interior Design...
-          </motion.h2>
-          <div className="loading-bar">
             <motion.div
-              className="loading-progress"
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 2, ease: "easeInOut" }}
-            />
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            >
+              <ThemeAwareLogo />
+            </motion.div>
+          </motion.div>
+          
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            Loading the Future of Interior Design
+            <span className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </motion.h2>
+          
+          <div className="loading-bar-container">
+            <motion.div
+              className="loading-percentage"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {Math.min(Math.round(loadingProgress), 100)}%
+            </motion.div>
+            <div className="loading-bar">
+              <motion.div
+                className="loading-progress"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(loadingProgress, 100)}%` }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
+            </div>
+          </div>
         </div>
-        </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -955,7 +1145,7 @@ export default function App() {
         <meta name="keywords" content="architectural design Ethiopia, interior design Addis Ababa, finishing work, branding services, 3D visualization, AR design, construction Ethiopia, home renovation, office design, commercial design, Awra Designs, professional architects, premium finishing, local expertise" />
         <meta name="author" content="Awra Finishing & Interior" />
         <meta name="robots" content="index, follow" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
         <link rel="canonical" href={`https://awradesigns.com#${currentSection}`} />
         <meta name="language" content="English" />
         <meta name="geo.region" content="ET-AA" />
@@ -1258,6 +1448,21 @@ export default function App() {
       {/* Hero Section - Luxury Redesign */}
       <section id="home" className={`hero ${heroImageLoaded ? 'hero-loaded' : ''}`} ref={heroRef} role="main" aria-label="Main content">
         <div id="main-content" style={{ position: 'absolute', top: 0, left: 0, width: '1px', height: '1px', overflow: 'hidden' }} aria-hidden="true"></div>
+        
+        {/* Hero Skeleton - Show while image is loading */}
+        {!heroImageLoaded && (
+          <div className="hero-skeleton">
+            <div className="hero-skeleton-content">
+              <div className="skeleton skeleton-text hero-skeleton-title"></div>
+              <div className="skeleton skeleton-text hero-skeleton-subtitle"></div>
+              <div className="skeleton skeleton-text hero-skeleton-subtitle" style={{ width: '70%' }}></div>
+              <div className="hero-skeleton-actions">
+                <div className="skeleton skeleton-button" style={{ height: '50px', width: '200px' }}></div>
+                <div className="skeleton skeleton-button" style={{ height: '50px', width: '200px' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Luxury Background Overlay */}
         <div className="hero-background-overlay"></div>
@@ -3046,56 +3251,108 @@ export default function App() {
             <form onSubmit={handleContactFormSubmit}>
               <div className="form-group">
                 <label htmlFor="contactName">Your Name</label>
-                <input 
-                  type="text" 
-                  id="contactName" 
-                  name="contactName" 
-                  placeholder="Your Name" 
-                  value={contactForm.name}
-                  onChange={(e) => handleContactFormChange('name', e.target.value)}
-                  required 
-                />
+                <div className="input-wrapper">
+                  <input 
+                    type="text" 
+                    id="contactName" 
+                    name="contactName" 
+                    placeholder="Your Name" 
+                    value={contactForm.name}
+                    onChange={(e) => handleContactFormChange('name', e.target.value)}
+                    onBlur={() => handleContactFormBlur('name')}
+                    className={contactFormTouched.name && contactFormErrors.name ? 'error' : contactFormTouched.name && !contactFormErrors.name ? 'valid' : ''}
+                    required 
+                  />
+                  {contactFormTouched.name && contactFormErrors.name && (
+                    <span className="error-icon">⚠️</span>
+                  )}
+                  {contactFormTouched.name && !contactFormErrors.name && contactForm.name && (
+                    <span className="success-icon">✓</span>
+                  )}
+                </div>
+                {contactFormTouched.name && contactFormErrors.name && (
+                  <span className="error-message">{contactFormErrors.name}</span>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="contactEmail">Your Email</label>
-                <input 
-                  type="email" 
-                  id="contactEmail" 
-                  name="contactEmail" 
-                  placeholder="your.email@example.com" 
-                  value={contactForm.email}
-                  onChange={(e) => handleContactFormChange('email', e.target.value)}
-                  required 
-                />
+                <div className="input-wrapper">
+                  <input 
+                    type="email" 
+                    id="contactEmail" 
+                    name="contactEmail" 
+                    placeholder="your.email@example.com" 
+                    value={contactForm.email}
+                    onChange={(e) => handleContactFormChange('email', e.target.value)}
+                    onBlur={() => handleContactFormBlur('email')}
+                    className={contactFormTouched.email && contactFormErrors.email ? 'error' : contactFormTouched.email && !contactFormErrors.email ? 'valid' : ''}
+                    required 
+                  />
+                  {contactFormTouched.email && contactFormErrors.email && (
+                    <span className="error-icon">⚠️</span>
+                  )}
+                  {contactFormTouched.email && !contactFormErrors.email && contactForm.email && (
+                    <span className="success-icon">✓</span>
+                  )}
+                </div>
+                {contactFormTouched.email && contactFormErrors.email && (
+                  <span className="error-message">{contactFormErrors.email}</span>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="contactPhone">Phone Number</label>
-                <input 
-                  type="tel" 
-                  id="contactPhone" 
-                  name="contactPhone" 
-                  placeholder="0923814125" 
-                  value={contactForm.phone}
-                  onChange={(e) => handleContactFormChange('phone', e.target.value)}
-                />
+                <div className="input-wrapper">
+                  <input 
+                    type="tel" 
+                    id="contactPhone" 
+                    name="contactPhone" 
+                    placeholder="0923814125" 
+                    value={contactForm.phone}
+                    onChange={(e) => handleContactFormChange('phone', e.target.value)}
+                    onBlur={() => handleContactFormBlur('phone')}
+                    className={contactFormTouched.phone && contactFormErrors.phone ? 'error' : contactFormTouched.phone && !contactFormErrors.phone && contactForm.phone ? 'valid' : ''}
+                  />
+                  {contactFormTouched.phone && contactFormErrors.phone && (
+                    <span className="error-icon">⚠️</span>
+                  )}
+                  {contactFormTouched.phone && !contactFormErrors.phone && contactForm.phone && (
+                    <span className="success-icon">✓</span>
+                  )}
+                </div>
+                {contactFormTouched.phone && contactFormErrors.phone && (
+                  <span className="error-message">{contactFormErrors.phone}</span>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="contactProjectType">Project Type</label>
-                <select 
-                  id="contactProjectType" 
-                  name="contactProjectType" 
-                  value={contactForm.projectType}
-                  onChange={(e) => handleContactFormChange('projectType', e.target.value)}
-                  required
-                >
-                  <option value="">Select project type</option>
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="office">Office</option>
-                  <option value="retail">Retail</option>
-                  <option value="restaurant">Restaurant</option>
-                  <option value="hospitality">Hospitality</option>
-                </select>
+                <div className="input-wrapper">
+                  <select 
+                    id="contactProjectType" 
+                    name="contactProjectType" 
+                    value={contactForm.projectType}
+                    onChange={(e) => handleContactFormChange('projectType', e.target.value)}
+                    onBlur={() => handleContactFormBlur('projectType')}
+                    className={contactFormTouched.projectType && contactFormErrors.projectType ? 'error' : contactFormTouched.projectType && !contactFormErrors.projectType ? 'valid' : ''}
+                    required
+                  >
+                    <option value="">Select project type</option>
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="office">Office</option>
+                    <option value="retail">Retail</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="hospitality">Hospitality</option>
+                  </select>
+                  {contactFormTouched.projectType && contactFormErrors.projectType && (
+                    <span className="error-icon">⚠️</span>
+                  )}
+                  {contactFormTouched.projectType && !contactFormErrors.projectType && contactForm.projectType && (
+                    <span className="success-icon">✓</span>
+                  )}
+                </div>
+                {contactFormTouched.projectType && contactFormErrors.projectType && (
+                  <span className="error-message">{contactFormErrors.projectType}</span>
+                )}
               </div>
               <div className="form-row">
                 <div className="form-group">
@@ -3153,15 +3410,31 @@ export default function App() {
               </div>
               <div className="form-group">
                 <label htmlFor="contactMessage">Project Description</label>
-                <textarea 
-                  id="contactMessage" 
-                  name="contactMessage" 
-                  placeholder="Tell us about your vision, requirements, or any specific ideas you have in mind..." 
-                  rows={5} 
-                  value={contactForm.message}
-                  onChange={(e) => handleContactFormChange('message', e.target.value)}
-                  required
-                ></textarea>
+                <div className="input-wrapper">
+                  <textarea 
+                    id="contactMessage" 
+                    name="contactMessage" 
+                    placeholder="Tell us about your vision, requirements, or any specific ideas you have in mind..." 
+                    rows={5} 
+                    value={contactForm.message}
+                    onChange={(e) => handleContactFormChange('message', e.target.value)}
+                    onBlur={() => handleContactFormBlur('message')}
+                    className={contactFormTouched.message && contactFormErrors.message ? 'error' : contactFormTouched.message && !contactFormErrors.message ? 'valid' : ''}
+                    required
+                  ></textarea>
+                  {contactFormTouched.message && contactFormErrors.message && (
+                    <span className="error-icon textarea-icon">⚠️</span>
+                  )}
+                  {contactFormTouched.message && !contactFormErrors.message && contactForm.message && (
+                    <span className="success-icon textarea-icon">✓</span>
+                  )}
+                </div>
+                {contactFormTouched.message && contactFormErrors.message && (
+                  <span className="error-message">{contactFormErrors.message}</span>
+                )}
+                {contactFormTouched.message && !contactFormErrors.message && contactForm.message && (
+                  <span className="character-count">{contactForm.message.length} characters</span>
+                )}
               </div>
               
               {/* Form Status Message */}

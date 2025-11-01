@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { reportComponentError } from '../services/errorReporting';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -30,15 +31,14 @@ class ErrorBoundary extends React.Component {
       errorId
     });
 
-    // Send to error reporting service (if available)
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'exception', {
-        description: error.message,
-        fatal: false,
-        custom_map: {
-          error_id: errorId
-        }
-      });
+    // Send to error reporting service
+    try {
+      const reportedErrorId = reportComponentError(error, errorInfo);
+      if (reportedErrorId) {
+        this.setState({ errorId: reportedErrorId });
+      }
+    } catch (reportingError) {
+      console.error('Failed to report error:', reportingError);
     }
 
     // Log to console for development

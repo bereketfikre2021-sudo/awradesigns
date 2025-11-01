@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Awra Designs" />
     <title>Awra Finishing & Interior - Professional Architecture & Design in Addis Ababa</title>
     
     <!-- SEO Meta Tags -->
@@ -66,36 +70,47 @@
     <meta name="geo.position" content="9.1450;38.7756" />
     <meta name="ICBM" content="9.1450, 38.7756" />
     
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/images/Hero%20BG.webp" as="image" type="image/webp" fetchpriority="high" />
+    <!-- Preload critical resources for LCP optimization -->
+    <link rel="preload" href="/images/Hero%20BG.webp" as="image" type="image/webp" fetchpriority="high" imagesizes="100vw" imagesrcset="/images/Hero%20BG.webp 1920w" />
     <link rel="preload" href="/images/LOGO-dark.webp" as="image" type="image/webp" />
     <link rel="preload" href="/images/LOGO-light.webp" as="image" type="image/webp" />
     <link rel="preload" href="/favicon.ico" as="image" type="image/x-icon" />
     
-    <!-- Preconnect for faster external resource loading -->
+    <!-- Preconnect for faster external resource loading (prioritized) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     
-    <!-- Resource hints for better performance -->
-    <link rel="prefetch" href="/images/work-samples-1.webp" />
-    <link rel="prefetch" href="/images/work-samples-2.webp" />
-    <link rel="prefetch" href="/images/work-samples-3.webp" />
-    
-    <!-- DNS Prefetch for external resources -->
+    <!-- DNS Prefetch for external resources (non-critical) -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//www.google-analytics.com" />
     <link rel="dns-prefetch" href="//connect.facebook.net" />
     
-    <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <!-- Preload critical fonts with font-display swap -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
     
-    <!-- Performance hints -->
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="/src/styles/critical.css" as="style" />
+    
+    <!-- Resource hints for better performance (below-the-fold) -->
+    <link rel="prefetch" href="/images/work-samples-1.webp" as="image" />
+    <link rel="prefetch" href="/images/work-samples-2.webp" as="image" />
+    <link rel="prefetch" href="/images/work-samples-3.webp" as="image" />
+    
+    <!-- Performance and mobile hints -->
     <meta name="format-detection" content="telephone=no" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Awra Designs" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="format-detection" content="telephone=yes" />
+    
+    <!-- Compression and caching hints -->
+    <meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width" />
+    <meta http-equiv="Accept-CH-Lifetime" content="86400" />
     
     <!-- Additional SEO meta tags -->
     <meta name="language" content="English" />
@@ -396,6 +411,27 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/index.jsx"></script>
+    <!-- Performance: Critical optimizations -->
+    <script>
+      // Critical performance optimizations
+      if ('loading' in HTMLImageElement.prototype) {
+        // Native lazy loading supported
+        document.documentElement.classList.add('native-lazy-loading');
+      }
+      
+      // Preload critical fonts
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          document.documentElement.classList.add('fonts-loaded');
+        });
+      }
+      
+      // Prevent layout shift
+      document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+      window.addEventListener('resize', () => {
+        document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+      });
+    </script>
     
     <!-- Tawk.to Live Chat -->
     <!-- 

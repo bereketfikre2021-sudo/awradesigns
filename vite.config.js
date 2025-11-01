@@ -102,12 +102,28 @@ export default defineConfig({
     sourcemap: false,
     target: 'esnext',
     minify: 'terser',
+    cssMinify: true,
+    cssCodeSplit: true,
     terserOptions: {
       compress: {
         drop_console: true,
         drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug']
-      }
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 2,
+        unsafe: true,
+        unsafe_comps: true,
+        unsafe_math: true,
+        unsafe_methods: true,
+        unsafe_proto: true,
+        unsafe_regexp: true,
+        unsafe_undefined: true,
+      },
+      format: {
+        comments: false,
+      },
+      mangle: {
+        safari10: true,
+      },
     },
     rollupOptions: {
       output: {
