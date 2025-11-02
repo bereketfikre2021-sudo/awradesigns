@@ -2,7 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/Awra-Designs/' : '/',
+  // base: '/Awra-Designs/', // Only needed for GitHub Pages, removed for Netlify
+  base: '/',
   plugins: [react()],
   server: {
     port: 8000,
