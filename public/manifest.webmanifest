@@ -1,0 +1,56 @@
+{
+  "name": "Awra Finishing & Interior - Professional Architecture & Design",
+  "short_name": "Awra Interior",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "lang": "en",
+  "scope": "/",
+  "description": "Professional architectural design, interior planning, finishing work, and branding services in Addis Ababa, Ethiopia. Expert team with 10+ years experience.",
+  "theme_color": "#ffd700",
+  "orientation": "portrait",
+  "categories": ["business", "productivity", "design"],
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Our Services",
+      "short_name": "Services",
+      "description": "View our architectural and interior design services",
+      "url": "/#services",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Contact Us",
+      "short_name": "Contact",
+      "description": "Get in touch with us",
+      "url": "/#contact",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
