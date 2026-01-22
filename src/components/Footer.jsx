@@ -64,7 +64,7 @@ const Footer = () => {
             <img
               src="/images/Asset 1.svg"
               alt="Awra Designs Logo"
-              className="h-14 w-auto mx-auto mb-4"
+              className="h-14 w-auto mx-auto mb-1"
               loading="lazy"
             />
           </div>

@@ -69,10 +69,10 @@ const Blog = () => {
       category: 'Interior Design',
       date: 'Dec 15, 2024',
       readTime: '5 min read',
-      title: 'Top 10 Interior Design Trends for 2025',
-      description: 'Discover the latest interior design trends that will dominate 2025, from sustainable materials to smart home integration.',
-      fullContent: 'As we approach 2025, the world of interior design is embracing new philosophies that prioritize sustainability, functionality, and personal well-being. Sustainable materials are taking center stage, with bamboo, reclaimed wood, and recycled materials becoming increasingly popular. Smart home integration continues to evolve, with homeowners seeking seamless technology that enhances rather than complicates daily life.\n\nBiophilic design remains strong, bringing nature indoors through living walls, natural light optimization, and organic shapes. Color palettes are shifting towards earthy tones and warm neutrals, creating calming and grounded spaces. Minimalism is being reinterpreted with curated collections rather than stark emptiness.\n\nThe trend towards multifunctional spaces has accelerated, with flexible room designs that adapt to changing needs. Custom and artisanal pieces are valued over mass-produced items, reflecting a desire for uniqueness and sustainability. Textured surfaces add depth and interest, while bold accent pieces create focal points in otherwise restrained spaces.',
-      tags: ['Trends', '2025', 'Modern'],
+      title: 'Top 10 Interior Design Trends for 2026',
+      description: 'Discover the latest interior design trends that will dominate 2026, from sustainable materials to smart home integration.',
+      fullContent: 'As we approach 2026, the world of interior design is embracing new philosophies that prioritize sustainability, functionality, and personal well-being. Sustainable materials are taking center stage, with bamboo, reclaimed wood, and recycled materials becoming increasingly popular. Smart home integration continues to evolve, with homeowners seeking seamless technology that enhances rather than complicates daily life.\n\nBiophilic design remains strong, bringing nature indoors through living walls, natural light optimization, and organic shapes. Color palettes are shifting towards earthy tones and warm neutrals, creating calming and grounded spaces. Minimalism is being reinterpreted with curated collections rather than stark emptiness.\n\nThe trend towards multifunctional spaces has accelerated, with flexible room designs that adapt to changing needs. Custom and artisanal pieces are valued over mass-produced items, reflecting a desire for uniqueness and sustainability. Textured surfaces add depth and interest, while bold accent pieces create focal points in otherwise restrained spaces.',
+      tags: ['Trends', '2026', 'Modern'],
     },
     {
       id: 2,
@@ -231,7 +231,7 @@ const Blog = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto"
+              className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-start justify-center p-0 sm:p-2 md:p-4 overflow-y-auto"
               onClick={() => {
                 setSelectedPost(null)
                 // Restore scroll position after closing
@@ -245,10 +245,10 @@ const Blog = () => {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="relative max-w-4xl w-full my-2 md:my-8 max-h-[95vh] md:max-h-[90vh] bg-gray-900 rounded-2xl border border-yellow-400/20 shadow-2xl overflow-y-auto"
+                className="relative max-w-4xl w-full h-full sm:h-auto sm:my-2 md:my-4 lg:my-8 sm:max-h-[98vh] md:max-h-[95vh] lg:max-h-[90vh] bg-gray-900 sm:rounded-xl md:rounded-2xl border border-yellow-400/20 shadow-2xl flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Close Button */}
+                {/* Close Button - Positioned above title */}
                 <motion.button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -258,28 +258,28 @@ const Blog = () => {
                       window.scrollTo({ top: scrollPosition, behavior: 'instant' })
                     }, 100)
                   }}
-                  className="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[40px] min-w-[40px] md:min-h-[48px] md:min-w-[48px]"
+                  className="absolute top-[110px] xs:top-[130px] sm:top-[190px] md:top-[250px] lg:top-[310px] right-3 sm:right-4 md:right-6 z-[60] w-11 h-11 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gray-800/95 sm:bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/50 sm:border-yellow-400/30 hover:border-yellow-400 shadow-2xl min-h-[44px] min-w-[44px] sm:min-h-[40px] sm:min-w-[40px] md:min-h-[48px] md:min-w-[48px]"
                   aria-label="Close modal"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                 >
                   <svg
-                    className="w-6 h-6"
+                    className="w-6 h-6 sm:w-5 sm:h-5 md:w-6 md:h-6"
                     fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
                     <path d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </motion.button>
 
-                {/* Modal Content */}
-                <div className="relative z-10">
+                {/* Modal Content - Scrollable */}
+                <div className="relative z-10 flex-1 overflow-y-auto min-h-0">
                   {/* Header Image */}
-                  <div className="relative h-48 md:h-64 lg:h-80 overflow-hidden rounded-t-2xl">
+                  <div className="relative h-32 xs:h-40 sm:h-48 md:h-64 lg:h-80 overflow-hidden rounded-t-none sm:rounded-t-xl md:rounded-t-2xl flex-shrink-0">
                     <img
                       src={selectedPost.image}
                       alt={selectedPost.title}
@@ -290,37 +290,37 @@ const Blog = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
                     {/* Category Badge */}
-                    <div className="absolute top-6 left-6 bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wide shadow-lg z-10">
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 md:top-4 md:left-4 lg:top-6 lg:left-6 bg-yellow-400 text-black px-2 py-1 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 rounded-md font-bold text-xs sm:text-xs md:text-sm uppercase tracking-wide shadow-lg z-10">
                       {selectedPost.category}
                     </div>
                   </div>
 
-                  <div className="p-4 md:p-6 lg:p-10">
+                  <div className="p-3 xs:p-4 sm:p-4 md:p-6 lg:p-10 flex-shrink-0">
                     {/* Metadata */}
-                    <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 mb-3 md:mb-4">
+                    <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 mb-2 md:mb-3 lg:mb-4">
                       <span>{selectedPost.date}</span>
                       <span>•</span>
                       <span>{selectedPost.readTime}</span>
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 md:mb-6 pr-8 md:pr-0">
+                    <h2 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 md:mb-4 lg:mb-6 pr-0 sm:pr-8 md:pr-0 leading-tight">
                       {selectedPost.title}
                     </h2>
 
                     {/* Full Content */}
                     <div className="prose prose-invert max-w-none">
-                      <div className="text-gray-300 leading-relaxed text-sm md:text-base lg:text-lg whitespace-pre-line">
+                      <div className="text-gray-300 leading-relaxed text-sm sm:text-base md:text-base lg:text-lg whitespace-pre-line">
                         {selectedPost.fullContent}
                       </div>
                     </div>
 
                     {/* Tags */}
-                    <div className="flex flex-wrap gap-2 md:gap-3 mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-800">
+                    <div className="flex flex-wrap gap-2 md:gap-3 mt-4 md:mt-6 lg:mt-8 pt-4 md:pt-6 lg:pt-8 border-t border-gray-800">
                       {selectedPost.tags.map((tag, tagIndex) => (
                         <span
                           key={tagIndex}
-                          className="px-4 py-2 text-gray-300 text-sm font-medium bg-gray-800 rounded-full hover:bg-yellow-400/20 hover:text-yellow-400 transition-colors"
+                          className="px-2 py-1 md:px-3 md:py-1.5 lg:px-4 lg:py-2 text-gray-300 text-xs md:text-sm font-medium bg-gray-800 rounded-full hover:bg-yellow-400/20 hover:text-yellow-400 transition-colors"
                         >
                           {tag}
                         </span>
@@ -328,7 +328,7 @@ const Blog = () => {
                     </div>
 
                     {/* Back/ESC Hint */}
-                    <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-800">
+                    <div className="mt-4 md:mt-6 lg:mt-8 pt-3 md:pt-4 lg:pt-6 border-t border-gray-800">
                       <p className="text-gray-500 text-xs md:text-sm text-center">
                         {isMobileOrTablet ? (
                           <>Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">Back</kbd> to close</>
