@@ -25,11 +25,28 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'animation-vendor': ['framer-motion'],
-          'three-vendor': ['three'],
-          'observer-vendor': ['react-intersection-observer']
+        manualChunks: (id) => {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            if (id.includes('framer-motion')) {
+              return 'animation-vendor'
+            }
+            if (id.includes('react-intersection-observer')) {
+              return 'observer-vendor'
+            }
+            // Other vendor libraries
+            return 'vendor'
+          }
+          // Component chunks for better code splitting
+          if (id.includes('/components/')) {
+            const componentName = id.split('/components/')[1]?.split('/')[0]
+            if (componentName && ['Portfolio', 'Blog', 'Testimonials'].includes(componentName)) {
+              return `component-${componentName.toLowerCase()}`
+            }
+          }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',

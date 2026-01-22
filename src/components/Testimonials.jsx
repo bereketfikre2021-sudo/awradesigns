@@ -1,11 +1,22 @@
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import { isMobile, prefersReducedMotion } from '../utils/deviceDetection'
 
 const Testimonials = () => {
   const { ref, inView } = useInView({
     threshold: 0.2,
     triggerOnce: true,
   })
+
+  const [shouldReduceAnimations, setShouldReduceAnimations] = useState(false)
+
+  useEffect(() => {
+    setShouldReduceAnimations(isMobile() || prefersReducedMotion())
+  }, [])
+
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
   const testimonials = [
     {
@@ -42,26 +53,29 @@ const Testimonials = () => {
     },
   ]
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
+  // Auto-slide functionality
+  useEffect(() => {
+    if (!inView || isPaused) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length)
+    }, 5000) // Change slide every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [inView, testimonials.length, isPaused])
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index)
   }
 
-  const itemVariants = {
-    hidden: { y: 50, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+    )
+  }
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length)
   }
 
   return (
@@ -76,95 +90,143 @@ const Testimonials = () => {
 
       <div className="container-custom relative z-10">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <motion.h2
-            variants={itemVariants}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white"
-          >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white">
             What Our <span className="text-gradient">Clients Say</span>
-          </motion.h2>
-          <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto"
-          >
+          </h2>
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
             Don't just take our word for it. See what our satisfied clients have to say about their experience with us.
-          </motion.p>
+          </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto"
-        >
-          {testimonials.map((testimonial) => (
-            <motion.div
-              key={testimonial.id}
-              variants={itemVariants}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="group bg-gray-900 rounded-2xl p-8 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 border border-gray-800 hover:border-yellow-400/50 relative overflow-hidden"
-            >
-              {/* Glow Effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
+        {/* Carousel Container */}
+        <div className="relative max-w-4xl mx-auto">
+          {/* Navigation Arrows */}
+          <motion.button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 bg-gray-900/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:text-yellow-400 hover:bg-gray-800 transition-all border border-gray-800 hover:border-yellow-400 min-h-[56px] min-w-[56px]"
+            aria-label="Previous testimonial"
+            whileHover={shouldReduceAnimations ? {} : { scale: 1.1 }}
+            whileTap={shouldReduceAnimations ? {} : { scale: 0.9 }}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </motion.button>
 
-              <div className="relative z-10">
-                {/* Quote Icon */}
-                <div className="mb-6">
-                  <svg className="w-12 h-12 text-yellow-400/30" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h3.983v10h-9.984z" />
-                  </svg>
-                </div>
+          <motion.button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 bg-gray-900/80 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:text-yellow-400 hover:bg-gray-800 transition-all border border-gray-800 hover:border-yellow-400 min-h-[56px] min-w-[56px]"
+            aria-label="Next testimonial"
+            whileHover={shouldReduceAnimations ? {} : { scale: 1.1 }}
+            whileTap={shouldReduceAnimations ? {} : { scale: 0.9 }}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </motion.button>
 
-                {/* Rating */}
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-yellow-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
+          {/* Testimonial Card */}
+          <div 
+            className="relative h-[500px] md:h-[450px]"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={shouldReduceAnimations ? { duration: 0.2 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0"
+              >
+                <div className="group bg-gray-900 rounded-2xl p-8 md:p-10 shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300 border border-gray-800 hover:border-yellow-400/50 relative overflow-hidden h-full">
+                  {/* Glow Effect */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300" />
 
-                {/* Testimonial Text */}
-                <p className="text-gray-300 leading-relaxed text-base mb-6">
-                  "{testimonial.text}"
-                </p>
+                  <div className="relative z-10 h-full flex flex-col justify-between">
+                    <div>
+                      {/* Quote Icon */}
+                      <div className="mb-6">
+                        <svg className="w-12 h-12 text-yellow-400/30" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h3.983v10h-9.984z" />
+                        </svg>
+                      </div>
 
-                {/* Client Info */}
-                <div className="flex items-center gap-4 pt-6 border-t border-gray-800">
-                  <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-yellow-400/30 group-hover:border-yellow-400 transition-colors">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                      {/* Rating */}
+                      <div className="flex gap-1 mb-4">
+                        {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className="w-5 h-5 text-yellow-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                          </svg>
+                        ))}
+                      </div>
+
+                      {/* Testimonial Text */}
+                      <p className="text-gray-300 leading-relaxed text-lg md:text-xl mb-6">
+                        "{testimonials[currentIndex].text}"
+                      </p>
+                    </div>
+
+                    {/* Client Info */}
+                    <div className="flex items-center gap-4 pt-6 border-t border-gray-800">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-yellow-400/30 group-hover:border-yellow-400 transition-colors">
+                        <img
+                          src={testimonials[currentIndex].image}
+                          alt={testimonials[currentIndex].name}
+                          className="w-full h-full object-cover"
+                          loading="eager"
+                          decoding="async"
+                          fetchPriority="high"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-white group-hover:text-yellow-400 transition-colors">
+                          {testimonials[currentIndex].name}
+                        </h4>
+                        <p className="text-gray-400">
+                          {testimonials[currentIndex].role}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-gray-400 text-sm">
-                      {testimonial.role}
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation Dots */}
+          <div className="flex justify-center gap-3 mt-8">
+            {testimonials.map((_, index) => (
+              <motion.button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  index === currentIndex
+                    ? 'w-10 h-3 bg-yellow-400'
+                    : 'w-3 h-3 bg-gray-700 hover:bg-gray-600'
+                }`}
+                aria-label={`Go to testimonial ${index + 1}`}
+                whileHover={shouldReduceAnimations ? {} : { scale: 1.2 }}
+                whileTap={shouldReduceAnimations ? {} : { scale: 0.9 }}
+                style={{ minHeight: '12px', minWidth: index === currentIndex ? '40px' : '12px' }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )
 }
 
 export default Testimonials
-

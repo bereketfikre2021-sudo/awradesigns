@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 
 const About = () => {
@@ -7,236 +8,309 @@ const About = () => {
     triggerOnce: true,
   })
 
-  const values = [
+  const [activeTab, setActiveTab] = useState('about')
+
+  const features = [
     {
-      title: 'Excellence',
-      description: 'We strive for perfection in every project, ensuring the highest quality standards.',
-      icon: (
-        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-        </svg>
-      ),
+      title: '5+ Years Experience',
+      description: 'Over 5 years of dedicated service in architectural design and interior planning.',
     },
     {
-      title: 'Innovation',
-      description: 'We embrace cutting-edge design trends and technologies to create exceptional spaces.',
-      icon: (
-        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-        </svg>
-      ),
+      title: '100+ Projects',
+      description: 'Successfully completed over 100 projects across Ethiopia.',
     },
     {
-      title: 'Integrity',
-      description: 'We build trust through transparent communication and honest business practices.',
-      icon: (
-        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-        </svg>
-      ),
+      title: 'Expert Team',
+      description: 'Skilled professionals with years of combined experience.',
     },
     {
-      title: 'Commitment',
-      description: 'We are dedicated to bringing your vision to life with passion and dedication.',
-      icon: (
-        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-        </svg>
-      ),
+      title: 'Quality Guarantee',
+      description: 'We ensure the highest standards in every project.',
     },
   ]
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
+  const steps = [
+    {
+      number: '01',
+      title: 'Consultation',
+      description: 'We start by understanding your vision, requirements, and budget.',
     },
-  }
+    {
+      number: '02',
+      title: 'Design & Planning',
+      description: 'Our team creates detailed plans and 3D visualizations.',
+    },
+    {
+      number: '03',
+      title: 'Execution',
+      description: 'Professional implementation with regular updates.',
+    },
+    {
+      number: '04',
+      title: 'Delivery',
+      description: 'Final inspection and project handover.',
+    },
+  ]
 
-  const itemVariants = {
-    hidden: { y: 50, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      },
+  const teamMembers = [
+    {
+      name: 'Tesfahun Tsegaye',
+      role: 'Founder and Lead Architect',
+      image: '/images/Tesfahun Tsegaye.webp',
+      description: 'Visionary founder and lead architect with exceptional expertise in architectural design and project leadership',
     },
-  }
+    {
+      name: 'Sarah Bekele',
+      role: 'Lead Interior Designer',
+      image: '/images/Sarah Bekele.webp',
+      description: 'Creative visionary with expertise in modern interior design',
+    },
+    {
+      name: 'Daniel Haile',
+      role: 'Senior Architect',
+      image: '/images/Daniel Haile.webp',
+      description: 'Experienced architect specializing in commercial and residential projects',
+    },
+    {
+      name: 'Bereket Fikre',
+      role: 'Brand Designer',
+      image: '/images/Bereket Fikre.webp',
+      description: 'Creative designer bringing brands to life with compelling visuals',
+    },
+  ]
+
+  const services = [
+    {
+      title: 'Architectural Design',
+      description: 'Professional architectural design and planning services.',
+    },
+    {
+      title: 'Interior Design',
+      description: 'Complete interior design and space planning.',
+    },
+    {
+      title: 'Finishing Work',
+      description: 'High-quality finishing and construction services.',
+    },
+    {
+      title: 'Branding Services',
+      description: 'Professional branding and visual identity design.',
+    },
+  ]
+
+  const tabs = [
+    { id: 'about', label: 'About Us' },
+    { id: 'why', label: 'Why Choose Us' },
+    { id: 'work', label: 'How We Work' },
+    { id: 'services', label: 'Our Services' },
+    { id: 'team', label: 'Our Team' },
+  ]
 
   return (
-    <section id="about" ref={ref} className="section-padding bg-black relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
-      </div>
-
-      <div className="container-custom relative z-10">
+    <section id="about" ref={ref} className="section-padding bg-black">
+      <div className="container-custom max-w-6xl">
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <motion.h2
-            variants={itemVariants}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white"
-          >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             About <span className="text-gradient">Awra Finishing & Interior</span>
-          </motion.h2>
-          <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto"
-          >
-            Creating exceptional architectural spaces and compelling brands in Addis Ababa, Ethiopia
-          </motion.p>
+          </h2>
         </motion.div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          {/* Left Column - Story */}
-          <motion.div
-            variants={itemVariants}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            className="space-y-6"
-          >
-            <h3 className="text-3xl font-bold text-white mb-4">Our Story</h3>
-            <div className="md:space-y-6 space-y-4">
-              {/* Mobile Version - Short */}
-              <motion.p 
-                className="md:hidden text-gray-300 leading-relaxed text-sm relative overflow-hidden"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <span className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full"></span>
-                <span className="block pl-5">Awra Finishing & Interior, based in Addis Ababa, Ethiopia, has over 5 years of experience in architectural design and interior planning. They specialize in creating functional, beautiful, and sustainable spaces.</span>
-              </motion.p>
-              
-              {/* Desktop Version - Full */}
-              <motion.p 
-                className="hidden md:block text-gray-300 leading-relaxed text-lg"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                Awra Finishing & Interior has been a trusted name in architectural design and interior
-                planning in Addis Ababa, Ethiopia for over 5 years. We specialize in creating
-                exceptional spaces that combine functionality, beauty, and sustainability.
-              </motion.p>
-              
-              {/* Mobile Version - Short */}
-              <motion.p 
-                className="md:hidden text-gray-300 leading-relaxed text-sm relative overflow-hidden"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                <span className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full"></span>
-                <span className="block pl-5">Their expert team offers services in architecture, interior design, finishing work, and branding. They have successfully completed over 100 projects, ranging from residential to commercial.</span>
-              </motion.p>
-              
-              {/* Desktop Version - Full */}
-              <motion.p 
-                className="hidden md:block text-gray-300 leading-relaxed text-lg"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                Our expert team brings together years of combined experience in architecture,
-                interior design, finishing work, and branding services. We've successfully completed
-                over 100 projects, ranging from residential homes to commercial spaces.
-              </motion.p>
-              
-              {/* Mobile Version - Short */}
-              <motion.p 
-                className="md:hidden text-gray-300 leading-relaxed text-sm relative overflow-hidden"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                <span className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full"></span>
-                <span className="block pl-5">Their mission is to transform visions into reality, creating inspiring spaces and impactful brands, while building lasting client relationships through exceptional service.</span>
-              </motion.p>
-              
-              {/* Desktop Version - Full */}
-              <motion.p 
-                className="hidden md:block text-gray-300 leading-relaxed text-lg"
-                initial={{ opacity: 0, x: -20 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.6 }}
-              >
-                Our mission is to transform your vision into reality, creating spaces that inspire and
-                brands that resonate. We believe in building lasting relationships with our clients
-                through exceptional service and outstanding results.
-              </motion.p>
-            </div>
-          </motion.div>
-
-          {/* Right Column - Mission/Vision */}
-          <motion.div
-            variants={itemVariants}
-            initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
-            className="space-y-8"
-          >
-            <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-yellow-400/50 transition-all duration-300">
-              <h4 className="text-2xl font-bold text-yellow-400 mb-4">Our Mission</h4>
-              <p className="text-gray-300 leading-relaxed">
-                To provide exceptional architectural design and interior planning services that
-                transform spaces and create compelling brands, while maintaining the highest standards
-                of quality and client satisfaction.
-              </p>
-            </div>
-            <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-yellow-400/50 transition-all duration-300">
-              <h4 className="text-2xl font-bold text-yellow-400 mb-4">Our Vision</h4>
-              <p className="text-gray-300 leading-relaxed">
-                To be the leading design firm in Ethiopia, recognized for our innovative designs,
-                exceptional craftsmanship, and commitment to excellence in every project we undertake.
-              </p>
-            </div>
-          </motion.div>
+        {/* Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8 border-b border-gray-800">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 font-medium transition-all relative ${
+                activeTab === tab.id
+                  ? 'text-yellow-400'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400"
+                />
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Values */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-        >
-          <motion.h3
-            variants={itemVariants}
-            className="text-3xl font-bold text-white mb-12 text-center"
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            Our Core Values
-          </motion.h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="bg-gray-900 rounded-2xl p-8 shadow-xl hover:shadow-yellow-500/20 transition-all duration-300 border border-gray-800 hover:border-yellow-400/50 group"
-              >
-                <div className="flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300 text-yellow-400 group-hover:text-yellow-300">
-                  {value.icon}
+            {activeTab === 'about' && (
+              <div className="max-w-5xl mx-auto">
+                <div className="relative">
+                  {/* Decorative Quote Icon */}
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-0">
+                    <svg className="w-16 h-16 md:w-20 md:h-20 text-yellow-400/10" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h3.983v10h-9.984z" />
+                    </svg>
+                  </div>
+
+                  {/* Main Content Card */}
+                  <div className="relative bg-gradient-to-br from-gray-900 via-gray-900 to-black rounded-2xl p-8 md:p-12 border border-yellow-400/20 shadow-2xl overflow-hidden">
+                    {/* Animated Background Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5 opacity-50"></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* First Paragraph with Large Opening */}
+                      <div className="mb-8">
+                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight mb-6">
+                          <span className="text-yellow-400 text-3xl md:text-4xl lg:text-5xl font-black">Awra Finishing & Interior</span>
+                          <br />
+                          <span className="text-xl md:text-2xl lg:text-3xl font-normal text-gray-300">has been transforming spaces in</span>
+                          <br />
+                          <span className="text-yellow-400/90">Addis Ababa, Ethiopia</span>
+                          <span className="text-xl md:text-2xl lg:text-3xl font-normal text-gray-300"> for over </span>
+                          <span className="text-yellow-400 text-3xl md:text-4xl font-bold">5 years</span>
+                          <span className="text-yellow-400">.</span>
+                        </p>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+                        <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+                      </div>
+
+                      {/* Second Paragraph with Highlighted Words */}
+                      <div className="text-center">
+                        <p className="text-lg md:text-xl lg:text-2xl text-gray-300 leading-relaxed">
+                          We blend{' '}
+                          <span className="relative inline-block mx-1">
+                            <span className="text-yellow-400 font-bold">functionality</span>
+                            <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-yellow-400/50 transform -skew-x-12"></span>
+                          </span>
+                          ,{' '}
+                          <span className="relative inline-block mx-1">
+                            <span className="text-yellow-400 font-bold">beauty</span>
+                            <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-yellow-400/50 transform -skew-x-12"></span>
+                          </span>
+                          , and{' '}
+                          <span className="relative inline-block mx-1">
+                            <span className="text-yellow-400 font-bold">sustainability</span>
+                            <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-yellow-400/50 transform -skew-x-12"></span>
+                          </span>
+                          {' '}to create exceptional architectural and interior spaces that{' '}
+                          <span className="text-yellow-400 font-semibold italic">inspire</span>
+                          .
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Corner Accents */}
+                    <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-yellow-400/30 rounded-tl-2xl"></div>
+                    <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-yellow-400/30 rounded-br-2xl"></div>
+                  </div>
                 </div>
-                <h4 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors">
-                  {value.title}
-                </h4>
-                <p className="text-gray-400 leading-relaxed">{value.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+              </div>
+            )}
+
+            {activeTab === 'why' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-900 rounded-xl p-6 border border-gray-800"
+                  >
+                    <h3 className="text-xl font-bold mb-3 text-white">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      {feature.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'work' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {steps.map((step, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-900 rounded-xl p-6 border border-gray-800"
+                  >
+                    <div className="text-yellow-400 text-2xl font-bold mb-4">
+                      {step.number}
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 text-white">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      {step.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'services' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {services.map((service, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-900 rounded-xl p-6 border border-gray-800"
+                  >
+                    <h3 className="text-xl font-bold mb-3 text-white">
+                      {service.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      {service.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'team' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="space-y-4">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold text-white">
+                        {member.name}
+                      </h3>
+                      <p className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+                        {member.role}
+                      </p>
+                      <p className="text-sm text-gray-300 leading-relaxed">
+                        {member.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   )

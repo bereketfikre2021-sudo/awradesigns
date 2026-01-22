@@ -132,6 +132,8 @@ const Blog = () => {
                     alt={post.title}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                   />
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4 bg-yellow-400 text-black px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wide z-10 shadow-lg">
@@ -204,10 +206,12 @@ const Blog = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
-                <button
+                <motion.button
                   onClick={() => setSelectedPost(null)}
-                  className="absolute top-4 right-4 z-10 w-12 h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg hover:scale-110"
+                  className="absolute top-4 right-4 z-10 w-12 h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[48px] min-w-[48px]"
                   aria-label="Close modal"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <svg
                     className="w-6 h-6"
@@ -220,7 +224,7 @@ const Blog = () => {
                   >
                     <path d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                </button>
+                </motion.button>
 
                 {/* Modal Content */}
                 <div className="overflow-y-auto max-h-[80vh]">
@@ -230,6 +234,9 @@ const Blog = () => {
                       src={selectedPost.image}
                       alt={selectedPost.title}
                       className="w-full h-full object-cover"
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
                     {/* Category Badge */}
