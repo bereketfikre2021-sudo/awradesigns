@@ -10,32 +10,62 @@ const Portfolio = () => {
   })
 
   const [shouldReduceAnimations, setShouldReduceAnimations] = useState(false)
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
+  const [scrollPosition, setScrollPosition] = useState(0)
 
   useEffect(() => {
     setShouldReduceAnimations(isMobile() || prefersReducedMotion())
+    // Check if mobile or tablet (width < 1024px)
+    const checkDevice = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024)
+    }
+    checkDevice()
+    window.addEventListener('resize', checkDevice)
+    return () => window.removeEventListener('resize', checkDevice)
   }, [])
 
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedProject, setSelectedProject] = useState(null)
 
-  // ESC key handler to close modal
+  // ESC key handler and browser back button handler to close modal
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === 'Escape' && selectedProject) {
         setSelectedProject(null)
+        // Restore scroll position after closing
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+        }, 100)
+      }
+    }
+
+    const handlePopState = (event) => {
+      if (selectedProject) {
+        setSelectedProject(null)
+        // Restore scroll position after closing
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+        }, 100)
       }
     }
 
     if (selectedProject) {
       document.addEventListener('keydown', handleEsc)
       document.body.style.overflow = 'hidden'
+      
+      // Push state to history for browser back button support (mobile/tablet)
+      if (isMobileOrTablet) {
+        window.history.pushState({ modalOpen: true }, '')
+        window.addEventListener('popstate', handlePopState)
+      }
     }
 
     return () => {
       document.removeEventListener('keydown', handleEsc)
+      window.removeEventListener('popstate', handlePopState)
       document.body.style.overflow = 'unset'
     }
-  }, [selectedProject])
+  }, [selectedProject, scrollPosition, isMobileOrTablet])
 
   const categories = ['all', '3D', 'Living', 'Bedroom', 'Gym', 'Lobby']
 
@@ -172,7 +202,11 @@ const Portfolio = () => {
               <div className="p-4 space-y-4">
                 <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors">{item.title}</h3>
                 <button
-                  onClick={() => setSelectedProject(item)}
+                  onClick={() => {
+                    // Store scroll position before opening modal
+                    setScrollPosition(window.scrollY)
+                    setSelectedProject(item)
+                  }}
                   className="w-full px-4 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors min-h-[44px] flex items-center justify-center gap-2"
                 >
                   <span>View Project</span>
@@ -193,8 +227,14 @@ const Portfolio = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
-            onClick={() => setSelectedProject(null)}
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto"
+            onClick={() => {
+              setSelectedProject(null)
+              // Restore scroll position after closing
+              setTimeout(() => {
+                window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+              }, 100)
+            }}
           >
             {/* Animated Background Pattern */}
             <div className="absolute inset-0 opacity-10">
@@ -209,16 +249,23 @@ const Portfolio = () => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="relative max-w-3xl w-full my-8 bg-gray-900 rounded-2xl border border-yellow-400/20 shadow-2xl overflow-hidden"
+              className="relative max-w-3xl w-full my-2 md:my-8 max-h-[95vh] md:max-h-[90vh] bg-gray-900 rounded-2xl border border-yellow-400/20 shadow-2xl overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Glow Effect */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400/20 via-yellow-500/20 to-yellow-400/20 rounded-2xl blur-xl opacity-50" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400/20 via-yellow-500/20 to-yellow-400/20 rounded-2xl blur-xl opacity-50 pointer-events-none" />
 
               {/* Close Button */}
               <motion.button
-                onClick={() => setSelectedProject(null)}
-                className="absolute top-4 right-4 z-10 w-12 h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[48px] min-w-[48px]"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedProject(null)
+                  // Restore scroll position after closing
+                  setTimeout(() => {
+                    window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+                  }, 100)
+                }}
+                className="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[40px] min-w-[40px] md:min-h-[48px] md:min-w-[48px]"
                 aria-label="Close modal"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -234,7 +281,7 @@ const Portfolio = () => {
               </motion.button>
 
               {/* Modal Content */}
-              <div className="relative z-10 p-6 md:p-10">
+              <div className="relative z-10 p-4 md:p-6 lg:p-10">
                 {/* Category Badge */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -252,7 +299,7 @@ const Portfolio = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.1 }}
-                  className="aspect-[4/3] overflow-hidden rounded-xl mb-6 relative group"
+                  className="aspect-[4/3] overflow-hidden rounded-xl mb-4 md:mb-6 relative group"
                 >
                   <img
                     src={selectedProject.image}
@@ -270,7 +317,7 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-3xl md:text-4xl font-bold text-white mb-4"
+                  className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-3 md:mb-4 pr-8 md:pr-0"
                 >
                   {selectedProject.title}
                 </motion.h3>
@@ -280,7 +327,7 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-gray-300 leading-relaxed text-base md:text-lg mb-6"
+                  className="text-gray-300 leading-relaxed text-sm md:text-base lg:text-lg mb-4 md:mb-6"
                 >
                   {selectedProject.description}
                 </motion.p>
@@ -290,7 +337,7 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="flex gap-4 pt-6 border-t border-gray-800"
+                  className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 md:pt-6 border-t border-gray-800"
                 >
                   <button
                     onClick={() => {
@@ -299,6 +346,9 @@ const Portfolio = () => {
                         const element = document.getElementById('contact')
                         if (element) {
                           element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        } else {
+                          // If contact section not found, restore original position
+                          window.scrollTo({ top: scrollPosition, behavior: 'instant' })
                         }
                       }, 200)
                     }}
@@ -320,15 +370,19 @@ const Portfolio = () => {
                   </a>
                 </motion.div>
 
-                {/* ESC Key Hint */}
+                {/* Back/ESC Hint */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="mt-6 pt-6 border-t border-gray-800"
+                  className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-800"
                 >
-                  <p className="text-gray-500 text-sm text-center">
-                    Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">ESC</kbd> to close
+                  <p className="text-gray-500 text-xs md:text-sm text-center">
+                    {isMobileOrTablet ? (
+                      <>Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">Back</kbd> to close</>
+                    ) : (
+                      <>Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">ESC</kbd> to close</>
+                    )}
                   </p>
                 </motion.div>
               </div>
