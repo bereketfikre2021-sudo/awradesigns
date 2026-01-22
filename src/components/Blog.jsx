@@ -9,25 +9,58 @@ const Blog = () => {
   })
 
   const [selectedPost, setSelectedPost] = useState(null)
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
+  const [scrollPosition, setScrollPosition] = useState(0)
 
-  // ESC key handler to close modal
+  useEffect(() => {
+    // Check if mobile or tablet (width < 1024px)
+    const checkDevice = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024)
+    }
+    checkDevice()
+    window.addEventListener('resize', checkDevice)
+    return () => window.removeEventListener('resize', checkDevice)
+  }, [])
+
+  // ESC key handler and browser back button handler to close modal
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === 'Escape' && selectedPost !== null) {
         setSelectedPost(null)
+        // Restore scroll position after closing
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+        }, 100)
+      }
+    }
+
+    const handlePopState = (event) => {
+      if (selectedPost !== null) {
+        setSelectedPost(null)
+        // Restore scroll position after closing
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+        }, 100)
       }
     }
 
     if (selectedPost !== null) {
       document.addEventListener('keydown', handleEsc)
       document.body.style.overflow = 'hidden'
+      
+      // Push state to history for browser back button support (mobile/tablet)
+      if (isMobileOrTablet) {
+        window.history.pushState({ modalOpen: true }, '')
+        window.addEventListener('popstate', handlePopState)
+      }
     }
 
     return () => {
       document.removeEventListener('keydown', handleEsc)
+      window.removeEventListener('popstate', handlePopState)
       document.body.style.overflow = 'unset'
     }
-  }, [selectedPost])
+  }, [selectedPost, scrollPosition, isMobileOrTablet])
 
   const blogPosts = [
     {
@@ -121,7 +154,11 @@ const Blog = () => {
               key={post.id}
               variants={itemVariants}
               whileHover={{ x: 5 }}
-              onClick={() => setSelectedPost(post)}
+              onClick={() => {
+                // Store scroll position before opening modal
+                setScrollPosition(window.scrollY)
+                setSelectedPost(post)
+              }}
               className="group bg-gray-900 rounded-xl border-l-4 border-yellow-400 hover:border-yellow-300 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-yellow-500/10"
             >
               <div className="flex flex-col md:flex-row">
@@ -194,21 +231,34 @@ const Blog = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
-              onClick={() => setSelectedPost(null)}
+              className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-start md:items-center justify-center p-2 md:p-4 overflow-y-auto"
+              onClick={() => {
+                setSelectedPost(null)
+                // Restore scroll position after closing
+                setTimeout(() => {
+                  window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+                }, 100)
+              }}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="relative max-w-4xl w-full my-8 bg-gray-900 rounded-2xl border border-yellow-400/20 shadow-2xl"
+                className="relative max-w-4xl w-full my-2 md:my-8 max-h-[95vh] md:max-h-[90vh] bg-gray-900 rounded-2xl border border-yellow-400/20 shadow-2xl overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
                 <motion.button
-                  onClick={() => setSelectedPost(null)}
-                  className="absolute top-4 right-4 z-10 w-12 h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[48px] min-w-[48px]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedPost(null)
+                    // Restore scroll position after closing
+                    setTimeout(() => {
+                      window.scrollTo({ top: scrollPosition, behavior: 'instant' })
+                    }, 100)
+                  }}
+                  className="absolute top-2 right-2 md:top-4 md:right-4 z-20 w-10 h-10 md:w-12 md:h-12 bg-gray-800/90 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-yellow-400 hover:text-black transition-all duration-300 border-2 border-yellow-400/30 hover:border-yellow-400 shadow-lg min-h-[40px] min-w-[40px] md:min-h-[48px] md:min-w-[48px]"
                   aria-label="Close modal"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
@@ -227,9 +277,9 @@ const Blog = () => {
                 </motion.button>
 
                 {/* Modal Content */}
-                <div className="overflow-y-auto max-h-[80vh]">
+                <div className="relative z-10">
                   {/* Header Image */}
-                  <div className="relative h-64 md:h-80 overflow-hidden rounded-t-2xl">
+                  <div className="relative h-48 md:h-64 lg:h-80 overflow-hidden rounded-t-2xl">
                     <img
                       src={selectedPost.image}
                       alt={selectedPost.title}
@@ -245,28 +295,28 @@ const Blog = () => {
                     </div>
                   </div>
 
-                  <div className="p-8 md:p-10">
+                  <div className="p-4 md:p-6 lg:p-10">
                     {/* Metadata */}
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+                    <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 mb-3 md:mb-4">
                       <span>{selectedPost.date}</span>
                       <span>•</span>
                       <span>{selectedPost.readTime}</span>
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                    <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 md:mb-6 pr-8 md:pr-0">
                       {selectedPost.title}
                     </h2>
 
                     {/* Full Content */}
                     <div className="prose prose-invert max-w-none">
-                      <div className="text-gray-300 leading-relaxed text-base md:text-lg whitespace-pre-line">
+                      <div className="text-gray-300 leading-relaxed text-sm md:text-base lg:text-lg whitespace-pre-line">
                         {selectedPost.fullContent}
                       </div>
                     </div>
 
                     {/* Tags */}
-                    <div className="flex flex-wrap gap-3 mt-8 pt-8 border-t border-gray-800">
+                    <div className="flex flex-wrap gap-2 md:gap-3 mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-800">
                       {selectedPost.tags.map((tag, tagIndex) => (
                         <span
                           key={tagIndex}
@@ -277,10 +327,14 @@ const Blog = () => {
                       ))}
                     </div>
 
-                    {/* ESC Key Hint */}
-                    <div className="mt-8 pt-6 border-t border-gray-800">
-                      <p className="text-gray-500 text-sm text-center">
-                        Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">ESC</kbd> to close
+                    {/* Back/ESC Hint */}
+                    <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-800">
+                      <p className="text-gray-500 text-xs md:text-sm text-center">
+                        {isMobileOrTablet ? (
+                          <>Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">Back</kbd> to close</>
+                        ) : (
+                          <>Press <kbd className="px-2 py-1 bg-gray-800 rounded text-yellow-400">ESC</kbd> to close</>
+                        )}
                       </p>
                     </div>
                   </div>
