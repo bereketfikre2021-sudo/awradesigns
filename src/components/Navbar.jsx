@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { throttle } from '../utils/throttle'
+
+const SCROLL_THROTTLE_MS = 120
 
 const Navbar = ({ isScrolled }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -30,9 +33,10 @@ const Navbar = ({ isScrolled }) => {
       })
       if (current) setActiveSection(current)
     }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const throttledScroll = throttle(handleScroll, SCROLL_THROTTLE_MS)
+    window.addEventListener('scroll', throttledScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', throttledScroll)
   }, [])
 
   const scrollToSection = (sectionId) => {

@@ -109,8 +109,8 @@ const Hero = () => {
 
       {/* Animated Background Particles & Golden Gradients */}
       {!shouldReduceAnimations && (
-        <div className="absolute inset-0 z-20 overflow-hidden pointer-events-none">
-          {[...Array(isMobile() ? 10 : 20)].map((_, i) => (
+        <div className="absolute inset-0 z-20 overflow-hidden pointer-events-none" style={{ willChange: 'transform' }}>
+          {[...Array(isMobile() ? 8 : 12)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 bg-yellow-400 rounded-full"

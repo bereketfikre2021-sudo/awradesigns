@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { throttle } from '../utils/throttle'
+
+const SCROLL_THROTTLE_MS = 80
 
 const ProgressBar = () => {
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -14,14 +17,13 @@ const ProgressBar = () => {
       const progress = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0
       setScrollProgress(Math.min(progress, 100))
     }
-
-    window.addEventListener('scroll', calculateScrollProgress)
-    window.addEventListener('resize', calculateScrollProgress)
+    const throttled = throttle(calculateScrollProgress, SCROLL_THROTTLE_MS)
+    window.addEventListener('scroll', throttled, { passive: true })
+    window.addEventListener('resize', throttled)
     calculateScrollProgress()
-
     return () => {
-      window.removeEventListener('scroll', calculateScrollProgress)
-      window.removeEventListener('resize', calculateScrollProgress)
+      window.removeEventListener('scroll', throttled)
+      window.removeEventListener('resize', throttled)
     }
   }, [])
 
