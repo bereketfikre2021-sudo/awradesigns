@@ -15,29 +15,47 @@ const Hero = () => {
     setShouldReduceAnimations(isMobile() || prefersReducedMotion() || isLowEndDevice())
   }, [])
 
-  const [displayedText, setDisplayedText] = useState('')
   const fullText = 'Professional Architecture & Design'
+  const TYPING_SPEED_MS = 55
+
+  const [displayedText, setDisplayedText] = useState('')
   const [showCursor, setShowCursor] = useState(true)
+  const [typingComplete, setTypingComplete] = useState(false)
+
+  const skipTyping = () => {
+    setDisplayedText(fullText)
+    setTypingComplete(true)
+    try {
+      sessionStorage.setItem('heroTypingSkipped', '1')
+    } catch (_) {}
+  }
 
   useEffect(() => {
     if (!inView) return
+    try {
+      if (sessionStorage.getItem('heroTypingSkipped')) {
+        setDisplayedText(fullText)
+        setTypingComplete(true)
+        return
+      }
+    } catch (_) {}
 
     let currentIndex = 0
     setDisplayedText('')
     setShowCursor(true)
+    setTypingComplete(false)
 
     const typingInterval = setInterval(() => {
       if (currentIndex < fullText.length) {
         setDisplayedText(fullText.slice(0, currentIndex + 1))
         currentIndex++
       } else {
+        setTypingComplete(true)
         clearInterval(typingInterval)
       }
-    }, 80) // Typing speed
+    }, TYPING_SPEED_MS)
 
-    return () => {
-      clearInterval(typingInterval)
-    }
+    return () => clearInterval(typingInterval)
   }, [inView, fullText])
 
   // Cursor blink effect
@@ -188,10 +206,24 @@ const Hero = () => {
             {displayedText}
             <span
               className={`inline-block w-0.5 h-5 md:h-6 bg-yellow-400 ml-2 align-middle transition-opacity duration-300 ${
-                showCursor ? 'opacity-100' : 'opacity-0'
+                showCursor && !typingComplete ? 'opacity-100' : 'opacity-0'
               }`}
+              aria-hidden="true"
             />
           </p>
+          {!typingComplete && displayedText.length > 0 && (
+            <motion.button
+              type="button"
+              onClick={skipTyping}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-sm text-gray-400 hover:text-yellow-400 transition-colors underline underline-offset-2 mt-2"
+              aria-label="Skip typing animation"
+            >
+              Skip
+            </motion.button>
+          )}
         </motion.div>
 
         {/* CTA Buttons */}

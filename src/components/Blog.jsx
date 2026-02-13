@@ -11,6 +11,28 @@ const Blog = () => {
   const [selectedPost, setSelectedPost] = useState(null)
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false)
   const [scrollPosition, setScrollPosition] = useState(0)
+  const [copySuccess, setCopySuccess] = useState(false)
+
+  useEffect(() => {
+    if (!selectedPost) setCopySuccess(false)
+  }, [selectedPost])
+
+  const getShareUrl = () => {
+    if (!selectedPost) return ''
+    return `${window.location.origin}${window.location.pathname}#blog-${selectedPost.id}`
+  }
+
+  const handleCopyLink = () => {
+    const url = getShareUrl()
+    if (!url) return
+    navigator.clipboard.writeText(url).then(
+      () => {
+        setCopySuccess(true)
+        setTimeout(() => setCopySuccess(false), 2000)
+      },
+      () => {}
+    )
+  }
 
   useEffect(() => {
     // Check if mobile or tablet (width < 1024px)
@@ -325,6 +347,50 @@ const Blog = () => {
                           {tag}
                         </span>
                       ))}
+                    </div>
+
+                    {/* Share */}
+                    <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gray-800">
+                      <p className="text-sm text-gray-400 mb-3">Share this article</p>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 hover:border-yellow-400/50 text-sm font-medium"
+                          aria-label={copySuccess ? 'Link copied' : 'Copy link'}
+                        >
+                          {copySuccess ? (
+                            <>
+                              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Copied!
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                              Copy link
+                            </>
+                          )}
+                        </button>
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(selectedPost.title + ' ' + getShareUrl())}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 hover:border-green-500/50 text-sm font-medium"
+                          aria-label="Share on WhatsApp"
+                        >
+                          <img
+                            src="/images/whatsapp-color-svgrepo-com.svg"
+                            alt=""
+                            className="w-5 h-5"
+                            aria-hidden="true"
+                          />
+                          WhatsApp
+                        </a>
+                      </div>
                     </div>
 
                     {/* Back/ESC Hint */}
